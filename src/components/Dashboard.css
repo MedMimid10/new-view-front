@@ -1,0 +1,243 @@
+.search-input {
+    border-radius: 30px !important;
+    padding: 8px 10px 8px 40px !important;
+}
+
+.input-icon {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.welcome-title{
+  display: flex;
+  align-items: center;
+}
+.welcome-title img {
+  width: 20px; /* Adjust as needed */
+  height: 20px; /* Adjust as needed */
+  margin-left: 8px; /* Space between text and icon */
+}
+.spot-ele {
+    display: flex;
+    justify-content: space-between;
+}
+
+.spot-ele h3 {
+  display: flex;
+  align-items: center;
+  font-weight: revert;
+}
+
+.spot-ele img {
+  width: 22px; /* Adjust as needed */
+  height: 20px; /* Adjust as needed */
+  margin-left: 8px; /* Space between text and icon */
+}
+
+/* Horizontal scrolling for cards */
+.card-container {
+  display: flex;
+  overflow-x: auto; 
+  padding: 10px 0;
+  gap: 10px;
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+
+.card-container .card-container::-webkit-scrollbar {
+  display: none; 
+}
+  
+.card-container .scroll-card {
+  position: relative;
+  flex-shrink: 0;
+  width: 300px;
+  height: 180px !important;
+  border-radius: 16px !important;
+}
+
+.card-container .scroll-card img {
+  width: 100%;
+  height: 100%; /* Adjust image height to take up a portion of the card */
+  object-fit: fill;
+  border-radius: 16px !important; /* Rounded top only */
+}
+  
+.card-container .info-btn {
+  position: absolute;
+  bottom: 14px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+  
+.card-container .card-info.card-body {
+  padding: 0 10px 0 0 !important;
+  color: #fff;
+}
+  
+.card-container .card-btn {
+  background-color: #5DADEC !important; 
+  border: none !important; 
+  font-size: 14px !important;
+  border-radius: 10px !important;
+  width: 80px; 
+  height: 30px;  
+  display: flex;
+  align-items: center !important;
+  justify-content: center !important;
+}
+  
+  
+.card-container .card-title{
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: bold;
+}
+
+.card-container .card-text {
+  font-size: 12px;
+}  
+
+.card-container-2 {
+  display: flex;
+  overflow-x: auto; 
+  padding: 10px 0;
+  gap: 10px;
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+
+.card-container-2::-webkit-scrollbar {
+  display: none; 
+}
+  
+.card-container-2 .scroll-card {
+  position: relative;
+  flex-shrink: 0;
+  width: 250px;
+  height: 150px !important;
+  border-radius: 16px !important;
+}
+
+.card-container-2 .scroll-card img {
+  width: 100%;
+  height: 100%; /* Adjust image height to take up a portion of the card */
+  object-fit: cover;
+  border-radius: 16px !important; /* Rounded top only */
+}
+  
+.card-container-2 .info-btn {
+  position: absolute;
+  bottom: 18px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+  
+.card-container-2 .card-info.card-body {
+  padding: 0 10px 0 0 !important;
+  color: #fff;
+}
+  
+.card-container-2 .card-btn {
+  background-color: #5DADEC !important; 
+  border: none !important; 
+  font-size: 14px !important;
+  border-radius: 10px !important;
+  width: 65px; 
+  height: 25px;  
+  display: flex;
+  align-items: center !important;
+  justify-content: center !important;
+}
+  
+  
+.card-container-2 .card-title{
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: bold;
+}
+
+.card-container-2 .card-text {
+  font-size: 12px;
+}  
+
+/* Container for scrollable images */
+.image-container {
+    display: flex;
+    overflow-x: auto; /* Enable horizontal scrolling */
+    gap: 10px; /* Space between images */
+    padding: 10px 0 0 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .image-container::-webkit-scrollbar {
+    display: none; 
+  }
+  
+  .image-item {
+    text-align: center; /* Center-align the image and title */
+    flex-shrink: 0; /* Prevent the images from shrinking */
+  }
+  
+  .scroll-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 15px !important; /* Adjust this value to control the roundness */
+  }
+  .scroll-image.rounded-circle {
+    border-radius: 10% !important;
+}
+
+.title-item {
+    font-size: 10px;
+    margin: 0 0 8px 0 !important;
+}
+
+/* Container for scrollable images */
+.image-containerC {
+  display: flex;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  gap: 16px; /* Space between images */
+  padding: 10px 0 0 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.image-containerC::-webkit-scrollbar {
+  display: none; 
+}
+
+.image-itemC {
+  text-align: center; /* Center-align the image and title */
+  flex-shrink: 0; /* Prevent the images from shrinking */
+}
+
+.scroll-imageC {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%; /* Fully circular */
+}
+
+.title-itemC {
+  font-size: 12px; /* Adjust font size for category titles */
+  margin-top: 8px; /* Space between image and title */
+}
+  

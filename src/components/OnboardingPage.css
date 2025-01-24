@@ -1,0 +1,55 @@
+/* OnboardingPage.css */
+.onboarding-container {
+    position: relative;
+    height: 100vh; /* Full viewport height */
+    width: 100%;
+    background-image: url('./assets/img-tourist.png');
+    background-size: cover; /* Cover the entire area */
+    background-position: center; /* Center the image */
+}
+
+.onboarding-content {
+    color: white;
+    padding: 50px 10px 10px 40px;
+}
+
+.onboarding-content .nv-image {
+    width: 78px;
+    height: 84px;
+
+}
+.onboarding-content .title-p,
+.onboarding-content .title-s {
+    display: block; /* Ensures each span is on a new line */
+}
+
+.onboarding-content .title-p {
+    font-size: 54px;
+    font-weight: 600;
+    font-family: 'Montserrat';
+    line-height: normal;
+    letter-spacing: 4px;
+}
+
+.onboarding-content .title-s {
+    font-size: 38px;
+    font-weight: 600;
+    font-family: 'Montserrat';
+    line-height: normal;
+    letter-spacing: 4px;
+}
+
+.road-image {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);  
+}
+
+.cercleM-image {
+    position: absolute;
+    right: 40px;
+}
+  
+
+  

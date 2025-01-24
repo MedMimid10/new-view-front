@@ -1,0 +1,216 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Syne:wght@400..800&display=swap');
+  
+  .app-name-nv {
+    border-radius: 24px;
+    /* background-color: #BE7259; */
+    text-align: center;
+    color: #BE7259 !important;
+  }
+
+  .text-land {
+    font-family: "Syne";
+    font-weight: 700 !important;
+    line-height: 65px !important;
+    margin-bottom: 0 !important;
+    font-size: 3rem !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .text-style {
+    font-size: 14px;
+    font-weight: 300;
+    margin: 0 6.5rem 1.25rem 6.5rem;
+  }
+  
+  .text-style-2 {
+    font-size: 14px;
+  }
+
+  .text-feature {
+    gap: 4rem !important;
+  }
+
+  .btn-feature {
+    padding: 14px 35px !important;
+    border-radius: 25px !important;
+    font-family: "Syne";
+    font-weight: 700 !important;
+    font-size: 18px !important;
+    background-color: #FFDCCC !important;
+    color: #BF6E51 !important;
+  }
+  .screenshot-section .image-container {
+    position: relative;
+    overflow: visible;
+
+  }
+  
+  
+  .screenshot-section .overlay-content {
+    position: absolute;
+    top: -20px; /* Adjust as needed to move the content higher */
+    left: 50%; /* Center align horizontally */
+    transform: translateX(-50%); /* Ensure proper centering */
+    z-index: 2;
+    text-align: center;
+    color: white;
+    padding: 1rem;
+    width: 100%; /*Prevents the content from spilling outside */
+    word-wrap: break-word; /* Ensures text wraps inside the container */
+  }
+  
+  
+  .screenshot-section img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  .btn-style {
+    font-size: 22px !important;
+    background-color: #BE7259 !important;
+    color: #fff !important;
+    font-weight: bold !important;
+
+  }
+
+  .card {
+    display: flex; /* Enables flexbox */
+    justify-content: center; /* Centers content horizontally */
+    align-items: center; /* Centers content vertically */
+    flex-direction: column; /* Ensures elements stack vertically */
+    text-align: center; /* Optional: Centers text */
+    height: 100%; /* Makes the card's height consistent */
+    border-radius: 12px !important;
+  }
+  
+  .card-body {
+    display: flex; /* Enables flexbox */
+    flex-direction: column; /* Stacks children vertically */
+    justify-content: center; /* Centers vertically */
+    align-items: center; /* Centers horizontally */
+    text-align: center; /* Optional: Centers text */
+    height: 100%; /* Fills the card container */
+  }
+
+
+  .icon-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #CF8562; /* Brown color */
+    color: #fff; /* White color for text and icon */
+    border-radius: 25px; /* Rounded corners */
+    padding: 0.5rem 1rem; /* Add spacing inside the container */
+    text-align: center; /* Centers the text within the container */
+    gap: 0.5rem; /* Spacing between the icon and the text */
+    max-width: fit-content; /* Ensure the background wraps tightly around content */
+  }
+  
+  .icon-card {
+    color: #fff; /* White color for the icon */
+    width: 20px;
+    height: 20px;
+  }
+  
+  .title-icon {
+    font-family: "Montserrat", sans-serif; /* Ensure consistent font */
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    margin: 0; /* Remove extra margins */
+  }
+  
+  .card-titleX {
+    font-family: "Syne";
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 35px;
+
+  }
+
+
+  .logo-footer {
+    width: 26px;
+    height: auto;
+  }
+  
+  .footer-app-name {
+    font-size: 15px;
+    font-family: "Montserrat";
+    font-weight: 500 !important;
+  }
+  
+  .footer-text {
+    color: #9CA3AF;
+    font-family: "Montserrat";
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+
+  }
+
+  @media(max-width:550px) {
+    .text-land {
+      font-size: 1.75rem !important;
+      line-height: 50px !important;
+      padding-bottom: 4rem !important;
+    }
+    .text-style {
+      font-size: 14px;
+      font-weight: 300;
+      margin: 0 2.25rem 2.5rem 2.25rem;
+      line-height: 22px;
+    }
+    .text-style-2 {
+      font-size: 14px;
+      line-height: 22px;
+    }
+    .btn-style {
+      font-size: 18px !important;
+      background-color: #BE7259 !important;
+      color: #fff !important;
+      font-weight: bold !important;
+    }
+
+    .screenshot-section .overlay-content {
+      position: absolute;
+      top: -56px; /* Adjust as needed to move the content higher */
+      left: 50%; /* Center align horizontally */
+      transform: translateX(-50%); /* Ensure proper centering */
+      z-index: 2;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+      width: 100%; /*Prevents the content from spilling outside */
+      word-wrap: break-word; /* Ensures text wraps inside the container */
+    }
+    .screenshot-section .image-container {
+      position: relative;
+      overflow: visible;
+      padding-top: 6rem;
+      padding-bottom: 1.5rem;
+    }
+    .text-feature {
+      gap: 2rem !important;
+      flex-direction: column;
+    }
+
+    .text-style-2 {
+      text-align: center !important;
+    }
+
+    .footer .footer-contentL {
+      display: flex;
+      flex-direction: column;
+      justify-content: center !important;
+    }
+
+    .footer-text {
+      padding-top: 8px;
+    }
+  }
+
+  

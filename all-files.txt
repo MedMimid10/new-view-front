@@ -1,0 +1,360 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Image } from 'react-bootstrap';
+
+import { Html, OrbitControls } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBackward, faForward, faPause, faPlay, faVolumeMute, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
+import * as THREE from 'three';
+import { useNavigate } from 'react-router-dom';
+import './VideoPlayer.css';
+
+// Local images for the Viewed Items section
+import Item1 from './assets/artisanat-marocain-exportations.jpg';
+import Item3 from './assets/arton52787.jpg';
+import Item2 from './assets/balghine.jpg';
+import Item4 from './assets/istockphoto-1094424202-612x612.jpg';
+import Item5 from './assets/theiere-moyenne.jpg';
+
+function VideoPlayer() {
+  const videoRef = useRef(null);
+  const popupRef = useRef(null);
+  const [videoTexture, setVideoTexture] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1.0);
+  const [volume, setVolume] = useState(0.5);
+  const [isMuted, setIsMuted] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [controlsEnabled, setControlsEnabled] = useState(true);
+  const [showHotspot, setShowHotspot] = useState(false);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [zPosition, setZPosition] = useState(-110);
+  const [xPosition, setXPosition] = useState(-50);
+  const [hotspotTexture, setHotspotTexture] = useState(null);
+
+  const navigate = useNavigate();
+
+  //const username = "Hamid Store";
+
+  const sellers = [
+    {
+      sellerId: 'hamidStore',
+      profileImage: 'hamidStore.png',
+      username: 'Hamid Store',
+      products: [
+        { image: Item1, title: 'Item 1' },
+        { image: Item2, title: 'Michèle Baconnier' },
+        { image: Item3, title: 'Item 3' },
+      ],
+    },
+    {
+      sellerId: 'johnsShop',
+      profileImage: 'johnsShop.png',
+      username: 'John\'s Shop',
+      products: [
+        { image: Item4, title: 'Product A' },
+        { image: Item5, title: 'Product B' },
+      ],
+    },
+  ];
+  
+  const [currentSellerId, setCurrentSellerId] = useState(null);
+  const currentSeller = sellers.find((seller) => seller.sellerId === currentSellerId);
+
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    loader.load('/profil-img.png', (texture) => {
+      setHotspotTexture(texture);
+    });
+  
+    const video = videoRef.current;
+    let animationFrameId; // Store the animation frame ID
+    let targetZPosition = -110; // Initialize the target Z position
+    let currentZPosition = -110; // Current animated Z position
+    let isAnimating = false; // To control ongoing animations
+  
+    const updateZPosition = () => {
+      // Smoothly interpolate Z position
+      currentZPosition += (targetZPosition - currentZPosition) * 0.03; // Adjust lerp factor for smoothness
+      console.log('currentZPosition: ' + currentZPosition);
+      setZPosition(currentZPosition);
+  
+      // Continue animation only if needed
+      if (Math.abs(targetZPosition - currentZPosition) > 0.01) {
+        animationFrameId = requestAnimationFrame(updateZPosition);
+      } else {
+        isAnimating = false; // Stop further animation
+      }
+    };
+  
+    if (video) {
+      const texture = new THREE.VideoTexture(video);
+      setVideoTexture(texture);
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.format = THREE.RGBFormat;
+  
+      video.onloadedmetadata = () => {
+        setDuration(video.duration);
+      };
+  
+      video.ontimeupdate = () => {
+        const currentTime = video.currentTime;
+        setCurrentTime(currentTime);
+  
+        // Check if the current time is within the hotspot interval
+        if (currentTime >= 11 && currentTime <= 18) {
+          targetZPosition = -110 + (currentTime - 11) * 36; // Adjust Z position based on time
+          console.log('targetZPosition: ' + targetZPosition);
+          setShowHotspot(true);
+  
+          // Start smooth animation only if not already animating
+          if (!isAnimating) {
+            isAnimating = true;
+            cancelAnimationFrame(animationFrameId); // Cancel any previous animation
+            updateZPosition();
+          }
+        } else {
+          setShowHotspot(false);
+          setIsPopupVisible(false);
+          targetZPosition = -110; // Reset Z position when hotspot is inactive
+  
+          // Start animation to return smoothly to the base position
+          if (!isAnimating) {
+            isAnimating = true;
+            cancelAnimationFrame(animationFrameId); // Cancel any ongoing animation
+            updateZPosition();
+          }
+        }
+      };
+    }
+  
+    return () => {
+      // Cleanup on component unmount
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);  
+
+  const handlePlayPause = () => {
+    const video = videoRef.current;
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play().catch((err) => {
+        console.warn('Play failed:', err);
+      });
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    const video = videoRef.current;
+    video.volume = newVolume;
+    setVolume(newVolume);
+    setIsMuted(newVolume === 0);
+  };
+  
+  const handleMuteUnmute = () => {
+    const video = videoRef.current;
+    if (isMuted) {
+      video.volume = volume;
+    } else {
+      video.volume = 0;
+    }
+    setIsMuted(!isMuted);
+  };
+  
+  const handleSeek = (e) => {
+    const seekTime = parseFloat(e.target.value);
+    const video = videoRef.current;
+    video.currentTime = seekTime;
+    setCurrentTime(seekTime);
+  };
+  
+  const handlePlaybackRateChange = () => {
+    const newRate = (playbackRate + 0.5) % 2.5 || 0.5;
+    const video = videoRef.current;
+    video.playbackRate = newRate;
+    setPlaybackRate(newRate);
+  };
+  
+  const skipForward = () => {
+    const video = videoRef.current;
+    video.currentTime = Math.min(video.currentTime + 10, video.duration);
+  };
+  
+  const skipBackward = () => {
+    const video = videoRef.current;
+    video.currentTime = Math.max(video.currentTime - 10, 0);
+  };
+  
+  const disableControls = () => {
+    setControlsEnabled(false);
+  };
+  
+  const enableControls = () => {
+    setControlsEnabled(true);
+  };
+  
+  // Handle hotspot click
+  const handleClickHotspot = (event, sellerId) => {
+    event.stopPropagation();
+    setCurrentSellerId(sellerId);
+    setIsPopupVisible(true);
+  };  
+
+  // Handle click outside the popup
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (isPopupVisible && popupRef.current && !popupRef.current.contains(e.target)) {
+        setIsPopupVisible(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside); // Cleanup
+  }, [isPopupVisible]);
+
+  return (
+    <div className="video-container">
+      <Canvas className="canvas" style={{ pointerEvents: isPopupVisible ? 'none' : 'auto' }}>
+        <ambientLight intensity={0.5} />
+        <OrbitControls
+          enableDamping={true}
+          rotateSpeed={1}
+          minDistance={50}
+          maxDistance={50}
+          enabled={!isPopupVisible}
+        />
+
+        {videoTexture && (
+          <mesh scale={[-1, 1, 1]} rotation={[0, 300, 0]}>
+            <sphereGeometry args={[150, 64, 64]} />
+            <meshBasicMaterial side={THREE.DoubleSide} map={videoTexture} />
+          </mesh>
+        )}
+
+        {showHotspot && (
+        <>
+            {/* Existing hotspot for hamidStore */}
+            <mesh
+              position={[95, 0, zPosition]}
+              onClick={(event) => {
+                handleClickHotspot(event, 'hamidStore');
+              }}
+              scale={[5, 5, 1]}
+              rotation={[0, 5, 0]}
+              className="hotspot"
+            >
+              <planeGeometry args={[3, 6]} />
+              <meshBasicMaterial map={hotspotTexture} transparent={true} />
+            </mesh>
+
+            {/* New hotspot for johnsShop */}
+            <mesh
+              position={[-50, 0, -120]} // New unique position
+              onClick={(event) => {
+                handleClickHotspot(event, 'johnsShop');
+              }}
+              scale={[5, 5, 1]}
+              rotation={[0, -5.5, 0]}
+              className="hotspot"
+            >
+              <planeGeometry args={[3, 6]} />
+              <meshBasicMaterial map={hotspotTexture} transparent={true} />
+            </mesh>
+          </>
+        )}
+
+
+        <Html fullscreen>
+          <div className="video-controls">
+            <button onClick={handlePlayPause} className="button">
+              <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+            </button>
+            <button onClick={skipBackward} className="button">
+              <FontAwesomeIcon icon={faBackward} /> 10s
+            </button>
+            <button onClick={skipForward} className="button">
+              <FontAwesomeIcon icon={faForward} /> 10s
+            </button>
+
+            <input
+              type="range"
+              min="0"
+              max={duration}
+              value={currentTime}
+              step="0.1"
+              onMouseDown={disableControls}
+              onMouseUp={enableControls}
+              onChange={handleSeek}
+              className="seek-bar"
+            />
+
+            <div className="volume-container">
+              <button onClick={handleMuteUnmute} className="button">
+                <FontAwesomeIcon icon={isMuted ? faVolumeMute : faVolumeUp} />
+              </button>
+              <input
+                type="range"
+                min="0.0"
+                max="1.0"
+                step="0.1"
+                value={isMuted ? 0 : volume}
+                onMouseDown={disableControls}
+                onMouseUp={enableControls}
+                onChange={handleVolumeChange}
+                className="volume-control"
+              />
+            </div>
+
+            <button onClick={handlePlaybackRateChange} className="button">
+              <span>{playbackRate}x</span>
+            </button>
+          </div>
+        </Html>
+      </Canvas>
+
+      {/* Fixed Popup */}
+      {isPopupVisible && currentSeller && (
+        <div className="popup" ref={popupRef}>
+          <div className="popup-header">
+            <div className="profile-section">
+              <img src={currentSeller.profileImage} alt="Profile" className="profile-image" />
+              <span className="username">{currentSeller.username}</span>
+            </div>
+            <div className="button-section">
+              <button
+                className="view-store-button"
+                onClick={() => navigate(`/seller/${currentSeller.sellerId}`)}
+              >
+                View Store
+              </button>
+            </div>
+          </div>
+          <div className="popup-content">
+            <div className="items-title">
+              <h3>Store Items</h3>
+              <span>Show more</span>
+            </div>
+            <div className="image-store mt-2">
+              {currentSeller.products.map((item, idx) => (
+                <div key={idx} className="image-item">
+                  <Image src={item.image} className="image-style" alt={item.title} />
+                  <p className="title-item">{item.title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <video ref={videoRef} style={{ display: 'none' }} src="/videos/marrakech-medina-video360.mp4" loop crossOrigin="anonymous" />
+    </div>
+  );
+}
+
+export default VideoPlayer;

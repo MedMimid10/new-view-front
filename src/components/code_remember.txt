@@ -1,0 +1,238 @@
+
+
+
+
+import React, { useEffect, useRef, useState } from 'react';
+import { Html, OrbitControls } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBackward, faForward, faPause, faPlay, faVolumeMute, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
+import * as THREE from 'three';
+import './VideoPlayer.css';
+
+function VideoPlayer() {
+  const videoRef = useRef(null);
+  const popupRef = useRef(null);
+  const [videoTexture, setVideoTexture] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1.0);
+  const [volume, setVolume] = useState(0.5);
+  const [isMuted, setIsMuted] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [controlsEnabled, setControlsEnabled] = useState(true);
+  const [showHotspot, setShowHotspot] = useState(false);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [zPosition, setZPosition] = useState(-110);
+  const [hotspotTexture, setHotspotTexture] = useState(null);
+
+  useEffect(() => {
+    // Load the texture asynchronously
+    const loader = new THREE.TextureLoader();
+    loader.load('/profil-img.png', (texture) => {
+      setHotspotTexture(texture);
+    });
+  
+    const video = videoRef.current;
+    if (video) {
+      const texture = new THREE.VideoTexture(video);
+      setVideoTexture(texture);
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.format = THREE.RGBFormat;
+  
+      video.onloadedmetadata = () => {
+        setDuration(video.duration);
+      };
+  
+      video.ontimeupdate = () => {
+        const currentTime = video.currentTime;
+        setCurrentTime(currentTime);
+  
+        // Check if the current time is within the hotspot interval
+        if (currentTime >= 11 && currentTime <= 18) {
+          let elapsedMilliseconds = (currentTime - 11) * 1000; // Time elapsed in ms since start of interval
+          const calculatedZPosition = -110 + (elapsedMilliseconds / 1000) * 20; // Scale Z position over time
+          //const calculatedZPosition = -110 + (currentTime - 11) * 30; // Adjust zPosition based on time
+          setZPosition(calculatedZPosition);
+          setShowHotspot(true);
+        } else {
+          setShowHotspot(false);
+          setIsPopupVisible(false);
+        }
+      };
+    }
+  }, []);  
+
+  const handlePlayPause = () => {
+    const video = videoRef.current;
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play().catch((err) => {
+        console.warn('Play failed:', err);
+      });
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleClickHotspot = () => {
+    setIsPopupVisible(true);
+  };
+
+  const handleClickOutsidePopup = (e) => {
+    if (isPopupVisible && popupRef.current && !popupRef.current.contains(e.target)) {
+      setIsPopupVisible(false);
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    const video = videoRef.current;
+    video.volume = newVolume;
+    setVolume(newVolume);
+    setIsMuted(newVolume === 0);
+  };
+
+  const handleMuteUnmute = () => {
+    const video = videoRef.current;
+    if (isMuted) {
+      video.volume = volume;
+    } else {
+      video.volume = 0;
+    }
+    setIsMuted(!isMuted);
+  };
+
+  const handleSeek = (e) => {
+    const seekTime = parseFloat(e.target.value);
+    const video = videoRef.current;
+    video.currentTime = seekTime;
+    setCurrentTime(seekTime);
+  };
+
+  const handlePlaybackRateChange = () => {
+    const newRate = (playbackRate + 0.5) % 2.5 || 0.5;
+    const video = videoRef.current;
+    video.playbackRate = newRate;
+    setPlaybackRate(newRate);
+  };
+
+  const skipForward = () => {
+    const video = videoRef.current;
+    video.currentTime = Math.min(video.currentTime + 10, video.duration);
+  };
+
+  const skipBackward = () => {
+    const video = videoRef.current;
+    video.currentTime = Math.max(video.currentTime - 10, 0);
+  };
+
+  const disableControls = () => {
+    setControlsEnabled(false);
+  };
+
+  const enableControls = () => {
+    setControlsEnabled(true);
+  };
+
+  return (
+    <div className="video-container" onClick={handleClickOutsidePopup}>
+      <Canvas className="canvas" style={{ pointerEvents: isPopupVisible ? 'none' : 'auto' }}>
+        <ambientLight intensity={0.5} />
+        <OrbitControls
+          enableDamping={true}
+          rotateSpeed={1}
+          minDistance={50}
+          maxDistance={50}
+          enabled={controlsEnabled}
+        />
+
+        {videoTexture && (
+          <mesh scale={[-1, 1, 1]} rotation={[0, 300, 0]}>
+            <sphereGeometry args={[150, 64, 64]} />
+            <meshBasicMaterial side={THREE.DoubleSide} map={videoTexture} />
+          </mesh>
+        )}
+
+        {showHotspot && (
+          <mesh
+            position={[95, 0, zPosition]}
+            onClick={handleClickHotspot}
+            scale={[5, 5, 1]}
+            rotation={[0, 5, 0]}
+            className="hotspot"
+          >
+            <planeGeometry args={[3, 6]} />
+            <meshBasicMaterial
+              map={hotspotTexture}
+              transparent={true}
+            />
+          </mesh>
+        )}
+
+        {isPopupVisible && showHotspot && (
+          <Html position={[75, 0, -10]}>
+            <div className="popup" ref={popupRef}>
+              <p>This is a traditional clothing store</p>
+              <a href="https://www.example.com" target="_blank" rel="noopener noreferrer">
+                Click here to know more!
+              </a>
+            </div>
+          </Html>
+        )}
+
+        <Html fullscreen>
+          <div className="video-controls">
+            <button onClick={handlePlayPause} className="button">
+              <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+            </button>
+            <button onClick={skipBackward} className="button">
+              <FontAwesomeIcon icon={faBackward} /> 10s
+            </button>
+            <button onClick={skipForward} className="button">
+              <FontAwesomeIcon icon={faForward} /> 10s
+            </button>
+
+            <input
+              type="range"
+              min="0"
+              max={duration}
+              value={currentTime}
+              step="0.1"
+              onMouseDown={disableControls}
+              onMouseUp={enableControls}
+              onChange={handleSeek}
+              className="seek-bar"
+            />
+
+            <div className="volume-container">
+              <button onClick={handleMuteUnmute} className="button">
+                <FontAwesomeIcon icon={isMuted ? faVolumeMute : faVolumeUp} />
+              </button>
+              <input
+                type="range"
+                min="0.0"
+                max="1.0"
+                step="0.1"
+                value={isMuted ? 0 : volume}
+                onMouseDown={disableControls}
+                onMouseUp={enableControls}
+                onChange={handleVolumeChange}
+                className="volume-control"
+              />
+            </div>
+
+            <button onClick={handlePlaybackRateChange} className="button">
+              <span>{playbackRate}x</span>
+            </button>
+          </div>
+        </Html>
+      </Canvas>
+
+      <video ref={videoRef} style={{ display: 'none' }} src="/videos/Morocco_Marrakech_Medina.mp4" loop crossOrigin="anonymous" />
+    </div>
+  );
+}
+
+export default VideoPlayer;
