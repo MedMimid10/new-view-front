@@ -83,6 +83,8 @@
 .card-container .card-info.card-body {
   padding: 0 10px 0 0 !important;
   color: #fff;
+  align-items: start;
+  text-align: left;
 }
   
 .card-container .card-btn {
@@ -150,6 +152,8 @@
 .card-container-2 .card-info.card-body {
   padding: 0 10px 0 0 !important;
   color: #fff;
+  align-items: start;
+  text-align: left;
 }
   
 .card-container-2 .card-btn {

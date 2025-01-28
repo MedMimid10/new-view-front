@@ -9,7 +9,7 @@ function LandingPage() {
   const navigate = useNavigate();
 
   const handleGetStartedClick = () => {
-    navigate('/');
+    navigate('/dashboard');
   };
 
   return (

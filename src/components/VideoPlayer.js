@@ -3,9 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Html, OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackward, faForward, faPause, faPlay, faVolumeMute, faVolumeUp, faArrowLeft, faAnglesRight, faAnglesLeft } from '@fortawesome/free-solid-svg-icons';
+import { faBackward, faForward, faPause, faPlay, faVolumeMute, faVolumeUp, faArrowLeft, faAnglesRight, faAnglesLeft, faShoppingCart, faTimes } from '@fortawesome/free-solid-svg-icons';
 import * as THREE from 'three';
-import { storeService } from '../services/api';
+import { storeService, spotService, soukService } from '../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './VideoPlayer.css';
 
@@ -21,11 +21,18 @@ function VideoPlayer() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [controlsEnabled, setControlsEnabled] = useState(true);
-  const [showHotspot, setShowHotspot] = useState(false);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [zPosition, setZPosition] = useState(-130);
-  const [hotspotTexture, setHotspotTexture] = useState(null);
-  const [hotspotTexture2, setHotspotTexture2] = useState(null);
+  const [stores, setStores] = useState([]);
+  const [locationName, setLocationName] = useState('');
+  const [leftStoresCount, setLeftStoresCount] = useState(0);
+  const [rightStoresCount, setRightStoresCount] = useState(0);
+  const [storeProducts, setStoreProducts] = useState({});
+  const [hotspotTextures, setHotspotTextures] = useState({});
+  const [visibleHotspots, setVisibleHotspots] = useState([]);
+  const [isCartVisible, setIsCartVisible] = useState(false);
+  const cartRef = useRef(null);
+  const [loadingStores, setLoadingStores] = useState(true);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -33,35 +40,74 @@ function VideoPlayer() {
   const videoUrl = location.state?.videoUrl;
   const spotType = location.state?.type;
 
-  const [stores, setStores] = useState([]);
-  const [storeProducts, setStoreProducts] = useState({});
-  const [loadingStores, setLoadingStores] = useState(true);
-  const [error, setError] = useState(null);
 
   const fetchStoreData = async (storeIds) => {
     try {
-        setLoadingStores(true);
-        const storesData = await Promise.all(
-            storeIds.map(id => storeService.getStoreDetails(id))
-        );
-        setStores(storesData);
+      setLoadingStores(true);
+      
+      // Use existing getStoreDetails method
+      const storesData = await Promise.all(
+        storeIds.map(id => storeService.getStoreDetails(id))
+      );
 
-        // Fetch products for each store
-        const productsData = {};
-        await Promise.all(
-            storeIds.map(async (id) => {
-                const products = await storeService.getStoreProducts(id);
-                productsData[id] = products;
-            })
+      // Get the first store to determine if it's a souk or spot
+      const firstStore = storesData[0];
+      let locationInfo;
+      
+      if (firstStore?.soukId) {
+        locationInfo = await soukService.getSoukById(firstStore.soukId);
+        setLocationName(locationInfo.name);
+      } else if (firstStore?.spotId) {
+        locationInfo = await spotService.getSpotById(firstStore.spotId);
+        setLocationName(locationInfo.name);
+      }
+
+      // Count stores on each side
+      const leftCount = storesData.filter(store => store.side === 'left').length;
+      const rightCount = storesData.filter(store => store.side === 'right').length;
+      
+      setLeftStoresCount(leftCount);
+      setRightStoresCount(rightCount);
+
+      // Create hotspot textures for each store
+      const textures = {};
+      storesData.forEach((store, index) => {
+        textures[store.id] = createHotspotTexture(
+          store.profileImageUrl,
+          store.name
         );
-        setStoreProducts(productsData);
-        setLoadingStores(false);
+      });
+      setHotspotTextures(textures);
+
+      // Fetch products for each store
+      const productsData = {};
+      await Promise.all(
+        storeIds.map(async (id) => {
+          const products = await storeService.getStoreProducts(id);
+          productsData[id] = products;
+        })
+      );
+
+      // Process store positions (alternating left and right)
+      const processedStores = storesData.map(store => ({
+        ...store,
+        position: store.side === 'right' 
+          ? [60, 0, -130]   
+          : [-60, 0, -130], 
+        rotation: store.side === 'right'
+          ? [0, 5, 0]       
+          : [0, -5, 0]     
+      }));
+
+      setStores(processedStores);
+      setStoreProducts(productsData);
+      setLoadingStores(false);
     } catch (err) {
-        console.error('Error fetching store data:', err);
-        setError(err.message);
-        setLoadingStores(false);
+      console.error('Error fetching store data:', err);
+      setError(err.message);
+      setLoadingStores(false);
     }
-};
+  };
 
   useEffect(() => {
     const storeIds = [1, 2]; 
@@ -153,81 +199,121 @@ function VideoPlayer() {
     return texture;
 };
   
+useEffect(() => {
+  const video = videoRef.current;
+  let animationFrameId;
+  const animationState = new Map(); // Track animation state for each store
   
-  useEffect(() => {
-    const loader = new THREE.TextureLoader();
-  
-    // Find the store with id = 1
-    const storeWithId1 = stores.find(store => store.id === 1);
-  
-    if (storeWithId1?.profileImageUrl) {
-      const customTexture = createHotspotTexture(
-        storeWithId1.profileImageUrl,
-        storeWithId1.name || 'Default Store'
+  if (video) {
+    // Prevent default touch behaviors
+    video.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    // Handle play/pause through your custom controls only
+    video.addEventListener('click', (e) => {
+      e.preventDefault();
+    });
+
+    video.src = videoUrl;
+    const texture = new THREE.VideoTexture(video);
+    setVideoTexture(texture);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.format = THREE.RGBFormat;
+
+    video.onloadedmetadata = () => {
+      setDuration(video.duration);
+    };
+
+    // Smooth animation function
+    const animate = () => {
+      const currentTime = video.currentTime;
+      setCurrentTime(currentTime);
+
+      // Get stores that should be visible
+      const visibleStores = stores.filter(store => 
+        currentTime >= store.startTime && 
+        currentTime <= store.endTime
       );
-      setHotspotTexture(customTexture);
-    }
-    
-    const video = videoRef.current;
-    let animationFrameId;
-    let targetZPosition = -130;
-    let currentZPosition = -130;
-    let isAnimating = false;
-  
-    const updatePositions = () => {
-      currentZPosition += (targetZPosition - currentZPosition) * 0.03;
-      setZPosition(currentZPosition);
-  
-      if (Math.abs(targetZPosition - currentZPosition) > 0.01) {
-        animationFrameId = requestAnimationFrame(updatePositions);
-      } else {
-        isAnimating = false;
-      }
-    };
-  
-    if (video) {
-      video.src = videoUrl;
-      const texture = new THREE.VideoTexture(video);
-      setVideoTexture(texture);
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      texture.format = THREE.RGBFormat;
-  
-      video.onloadedmetadata = () => {
-        setDuration(video.duration);
-      };
-  
-      video.ontimeupdate = () => {
-        const currentTime = video.currentTime;
-        setCurrentTime(currentTime);
-  
-        if (currentTime >= 6 && currentTime <= 16) {
-          targetZPosition = -130 + (currentTime - 6) * 15;
-          setShowHotspot(true);
-  
-          if (!isAnimating) {
-            isAnimating = true;
-            cancelAnimationFrame(animationFrameId);
-            updatePositions();
-          }
-        } else {
-          setShowHotspot(false);
-          setIsPopupVisible(false);
-          targetZPosition = -130;
-  
-          if (!isAnimating) {
-            isAnimating = true;
-            cancelAnimationFrame(animationFrameId);
-            updatePositions();
-          }
+
+      // Update position for each visible store with smooth animation
+      const updatedStores = visibleStores.map(store => {
+        const targetZ = -130 + (currentTime - store.startTime) * 15;
+        
+        // Initialize or get current animation state
+        if (!animationState.has(store.id)) {
+          animationState.set(store.id, {
+            currentZ: -130,
+            velocity: 0
+          });
         }
-      };
-    }
-  
-    return () => {
-      cancelAnimationFrame(animationFrameId);
+        
+        const state = animationState.get(store.id);
+        
+        // Spring animation parameters
+        const springStrength = 0.3; // Adjust for more/less springiness
+        const damping = 0.75; // Adjust for more/less smoothing
+        
+        // Calculate spring physics
+        const distance = targetZ - state.currentZ;
+        const acceleration = distance * springStrength;
+        state.velocity = state.velocity * damping + acceleration;
+        state.currentZ += state.velocity;
+
+        return {
+          ...store,
+          position: [
+            store.position[0],
+            store.position[1],
+            state.currentZ
+          ]
+        };
+      });
+
+      // Clean up animation states for non-visible stores
+      for (const [storeId] of animationState) {
+        if (!visibleStores.some(store => store.id === storeId)) {
+          animationState.delete(storeId);
+        }
+      }
+
+      setVisibleHotspots(updatedStores);
+      
+      // Hide popup if no hotspots are visible
+      if (updatedStores.length === 0) {
+        setIsPopupVisible(false);
+      }
+
+      // Continue animation loop
+      animationFrameId = requestAnimationFrame(animate);
     };
-  }, [videoUrl, stores]);  
+
+    // Start animation loop
+    animationFrameId = requestAnimationFrame(animate);
+
+    video.ontimeupdate = () => {
+      // Keep this for time tracking, but position updates happen in animation loop
+      setCurrentTime(video.currentTime);
+    };
+  }
+
+  return () => {
+    video.removeEventListener('touchstart', (e) => {
+      e.preventDefault();
+    });
+    video.removeEventListener('click', (e) => {
+      e.preventDefault();
+    });
+    
+    if (video) {
+      video.ontimeupdate = null;
+    }
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+  };
+}, [videoUrl, stores]);
 
   const handlePlayPause = () => {
     const video = videoRef.current;
@@ -315,7 +401,7 @@ function VideoPlayer() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside); // Cleanup
-  }, [isPopupVisible]);
+  }, [isPopupVisible], [isCartVisible]);
 
   return (
     <div className="video-container">
@@ -327,6 +413,9 @@ function VideoPlayer() {
           minDistance={50}
           maxDistance={50}
           enabled={!isPopupVisible}
+          enableZoom={false}          
+          enablePan={false}             
+          dampingFactor={0.1}
         />
 
         {videoTexture && (
@@ -336,107 +425,157 @@ function VideoPlayer() {
           </mesh>
         )}
 
-        {showHotspot && (
-        <>
-            {/* Existing hotspot for hamidStore */}
-            <mesh
-              position={[60, 0, zPosition]}
-              onClick={(event) => handleClickHotspot(event, 1)}
-              scale={[5, 5, 1]}
-              rotation={[0, 5, 0]}
-              className="hotspot"
-            >
-              <planeGeometry args={[8, 3.5]} />
-              <meshBasicMaterial map={hotspotTexture} transparent={true} />
-            </mesh>
-          </>
-        )}
+        {/* Render all visible hotspots */}
+        {visibleHotspots.map(store => (
+          <mesh
+            key={store.id}
+            position={store.position}
+            onClick={(event) => handleClickHotspot(event, store.id)}
+            scale={[5, 5, 1]}
+            rotation={store.rotation}
+            className="hotspot"
+          >
+            <planeGeometry args={[8, 3.5]} />
+            <meshBasicMaterial 
+              map={hotspotTextures[store.id]} 
+              transparent={true} 
+            />
+          </mesh>
+        ))}
 
-        <Html fullscreen>
-        {/* New Souk Info Card */}
-        <button class="back-buttonV" onClick={() => navigate(-1)}>
-          <FontAwesomeIcon icon={faArrowLeft}/>
-        </button>
-        <div className="souk-info-card">
-            <div className="souk-info-container">
-              <div className="info-item">
-                <div className="icon">
-                <FontAwesomeIcon icon={faAnglesLeft} />
-                </div>
-                <span className="info-text">15 Stores</span>
-              </div>
-              
-              <div className="souk-name">
-                <h2>Souk Al Mubarakiya</h2>
-              </div>
-              
-              <div className="info-item">
-                <span className="info-text">8 Stores</span>
-                <div className="icon">
-                <FontAwesomeIcon icon={faAnglesRight} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="video-controls">
-            {/* First Row */}
-            <div className="video-row-1">
-              <div className="volume-container">
-                <div className="volume-wrapper">
-                  <button onClick={handleMuteUnmute} className="button circular">
-                    <FontAwesomeIcon icon={isMuted ? faVolumeMute : faVolumeUp} />
-                  </button>
-                  <input
-                    type="range"
-                    min="0.0"
-                    max="1.0"
-                    step="0.1"
-                    value={isMuted ? 0 : volume}
-                    onMouseDown={disableControls}
-                    onMouseUp={enableControls}
-                    onChange={handleVolumeChange}
-                    className="volume-control"
-                  />
-                </div>
-              </div>
-              <div className="progress-container">
-                <span className="time">{formatTime(currentTime)}</span>
-                <input
-                  type="range"
-                  min="0"
-                  max={duration}
-                  value={currentTime}
-                  step="0.1"
-                  onMouseDown={disableControls}
-                  onMouseUp={enableControls}
-                  onChange={handleSeek}
-                  className="seek-bar"
-                />
-                <span className="time">{formatTime(duration)}</span>
-              </div>
-              <div className="speed-control">
-                <button onClick={handlePlaybackRateChange} className="button circular">
-                  <span>{playbackRate}x</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Second Row */}
-            <div className="video-row-2">
-              <button onClick={skipBackward} className="button skip-button">
-                <FontAwesomeIcon icon={faBackward} /> <span>10s</span>
-              </button>
-              <button onClick={handlePlayPause} className="button circular play-button">
-                <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
-              </button>
-              <button onClick={skipForward} className="button skip-button">
-                <FontAwesomeIcon icon={faForward} /> <span>10s</span>
-              </button>
-            </div>
-          </div>
-        </Html>
       </Canvas>
+      {/* New Souk Info Card */}
+      <button class="back-buttonV" onClick={() => navigate(-1)}>
+        <FontAwesomeIcon icon={faArrowLeft}/>
+      </button>
+
+      {/* New cart button */}
+      <button className="cart-buttonV" onClick={() => setIsCartVisible(!isCartVisible)}>
+        <FontAwesomeIcon icon={faShoppingCart}/>
+        {/* {cartItems.length > 0 && <span className="cart-badge">{cartItems.length}</span>} */}
+      </button>
+
+      {/* Cart popup */}
+      {isCartVisible && (
+        <div className="cart-popup" ref={cartRef}>
+          <div className="cart-header">
+            <h3>Shopping Cart</h3>
+            <button className="close-button" onClick={() => setIsCartVisible(false)}>
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+          <div className="cart-items">
+            {/* {cartItems.length === 0 ? (
+              <p className="empty-cart">Your cart is empty</p>
+            ) : (
+              cartItems.map(item => (
+                <div key={item.id} className="cart-item">
+                  <img src={item.imageUrl} alt={item.name} className="item-image" />
+                  <div className="item-details">
+                    <h4>{item.name}</h4>
+                    <p className="item-price">${item.price}</p>
+                  </div>
+                  <div className="item-quantity">
+                    <button onClick={() => updateQuantity(item.id, -1)}>-</button>
+                    <span>{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item.id, 1)}>+</button>
+                  </div>
+                </div>
+              ))
+            )} */}
+          </div>
+          {/* {cartItems.length > 0 && (
+            <div className="cart-footer">
+              <div className="cart-total">
+                <span>Total:</span>
+                <span>${calculateTotal()}</span>
+              </div>
+              <button className="checkout-button" onClick={handleCheckout}>
+                Checkout
+              </button>
+            </div>
+          )} */}
+        </div>
+      )}
+
+      <div className="souk-info-card">
+        <div className="souk-info-container">
+          <div className="info-item">
+            <div className="icon">
+              <FontAwesomeIcon icon={faAnglesLeft} />
+            </div>
+            <span className="info-text">{leftStoresCount} Stores</span>
+          </div>
+          
+          <div className="souk-name">
+            <h2>{locationName || 'Loading...'}</h2>
+          </div>
+          
+          <div className="info-item">
+            <span className="info-text">{rightStoresCount} Stores</span>
+            <div className="icon">
+              <FontAwesomeIcon icon={faAnglesRight} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="video-controls">
+        {/* First Row */}
+        <div className="video-row-1">
+          <div className="volume-container">
+            <div className="volume-wrapper">
+              <button onClick={handleMuteUnmute} className="button circular">
+                <FontAwesomeIcon icon={isMuted ? faVolumeMute : faVolumeUp} />
+              </button>
+              <input
+                type="range"
+                min="0.0"
+                max="1.0"
+                step="0.1"
+                value={isMuted ? 0 : volume}
+                onMouseDown={disableControls}
+                onMouseUp={enableControls}
+                onChange={handleVolumeChange}
+                className="volume-control"
+              />
+            </div>
+          </div>
+          <div className="progress-container">
+            <span className="time">{formatTime(currentTime)}</span>
+            <input
+              type="range"
+              min="0"
+              max={duration}
+              value={currentTime}
+              step="0.1"
+              onMouseDown={disableControls}
+              onMouseUp={enableControls}
+              onChange={handleSeek}
+              className="seek-bar"
+            />
+            <span className="time">{formatTime(duration)}</span>
+          </div>
+          <div className="speed-control">
+            <button onClick={handlePlaybackRateChange} className="button circular">
+              <span>{playbackRate}x</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Second Row */}
+        <div className="video-row-2">
+          <button onClick={skipBackward} className="button skip-button">
+            <FontAwesomeIcon icon={faBackward} /> <span>10s</span>
+          </button>
+          <button onClick={handlePlayPause} className="button circular play-button">
+            <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+          </button>
+          <button onClick={skipForward} className="button skip-button">
+            <FontAwesomeIcon icon={faForward} /> <span>10s</span>
+          </button>
+        </div>
+      </div>
 
       {/* Fixed Popup */}
       {isPopupVisible && currentSeller && (
@@ -480,7 +619,8 @@ function VideoPlayer() {
       </div>
       )}
 
-      <video ref={videoRef} style={{ display: 'none' }} src={videoUrl} loop crossOrigin="anonymous" />
+      <video ref={videoRef} style={{ display: 'none' }} src={videoUrl} loop crossOrigin="anonymous" playsInline webkit-playsinline="true"
+        x5-playsinline="true" preload="auto" controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture disableRemotePlayback/>
       {/* <video ref={videoRef} style={{ display: 'none' }} src="D:/video360/VID_20250110_191328_00_042.mp4" loop crossOrigin="anonymous" /> */}
     </div>
   );

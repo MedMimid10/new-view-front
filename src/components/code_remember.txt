@@ -236,3 +236,87 @@ function VideoPlayer() {
 }
 
 export default VideoPlayer;
+
+
+useEffect(() => {
+    const loader = new THREE.TextureLoader();
+  
+    const storeWithId1 = stores.find(store => store.id === 1);
+    const storeWithId2 = stores.find(store => store.id === 2);
+
+    if (storeWithId1?.profileImageUrl) {
+      const customTexture1 = createHotspotTexture(
+        storeWithId1.profileImageUrl,
+        storeWithId1.name || 'Default Store'
+      );
+      setHotspotTexture(customTexture1);
+    }
+
+    if (storeWithId2?.profileImageUrl) {
+      const customTexture2 = createHotspotTexture(
+        storeWithId2.profileImageUrl,
+        storeWithId2.name || 'Second Store'
+      );
+      setHotspotTexture2(customTexture2);
+    }
+    
+    const video = videoRef.current;
+    let animationFrameId;
+    let targetZPosition = -130;
+    let currentZPosition = -130;
+    let isAnimating = false;
+  
+    const updatePositions = () => {
+      currentZPosition += (targetZPosition - currentZPosition) * 0.03;
+      setZPosition(currentZPosition);
+  
+      if (Math.abs(targetZPosition - currentZPosition) > 0.01) {
+        animationFrameId = requestAnimationFrame(updatePositions);
+      } else {
+        isAnimating = false;
+      }
+    };
+  
+    if (video) {
+      video.src = videoUrl;
+      const texture = new THREE.VideoTexture(video);
+      setVideoTexture(texture);
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.format = THREE.RGBFormat;
+  
+      video.onloadedmetadata = () => {
+        setDuration(video.duration);
+      };
+  
+      video.ontimeupdate = () => {
+        const currentTime = video.currentTime;
+        setCurrentTime(currentTime);
+  
+        if (currentTime >= 6 && currentTime <= 16) {
+          targetZPosition = -130 + (currentTime - 6) * 15;
+          setShowHotspot(true);
+  
+          if (!isAnimating) {
+            isAnimating = true;
+            cancelAnimationFrame(animationFrameId);
+            updatePositions();
+          }
+        } else {
+          setShowHotspot(false);
+          setIsPopupVisible(false);
+          targetZPosition = -130;
+  
+          if (!isAnimating) {
+            isAnimating = true;
+            cancelAnimationFrame(animationFrameId);
+            updatePositions();
+          }
+        }
+      };
+    }
+  
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [videoUrl, stores]);  

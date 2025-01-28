@@ -12,31 +12,33 @@ import SellerProfile from './components/SellerProfile';
 import ProductPage from './components/ProductPage';
 import './App.css';
 import LandingPage from './components/LandingPage';
+import { Navigate } from 'react-router-dom';
 
 function App() {
   const [activeTab, setActiveTab] = useState('/');
 
   // Paths where the navbar should be hidden
-  const hiddenNavbarPaths = ['/onboarding', '/videoPlayer', '/seller', '/product', '/landingPage', '/login', '/register' ];
+  const hiddenNavbarPaths = ['/onboarding', '/videoPlayer', '/seller', '/product', '/landingPage', '/login', '/register'];
 
   // Layout component to handle routes and navbar
   function Layout() {
     const location = useLocation();
 
-    // Update activeTab when location changes
     useEffect(() => {
       setActiveTab(location.pathname);
     }, [location.pathname]);
 
-    // Check if the current path matches any of the hiddenNavbarPaths
     const shouldHideNavbar = hiddenNavbarPaths.some((path) => location.pathname.startsWith(path));
 
     return (
       <>
-        {/* Main Routes for Pages */}
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          {/* Add redirect for root path to landing page */}
+          <Route path="/" element={<Navigate to="/landingPage" replace />} />
+          
+          {/* Rest of your routes */}
           <Route path='/landingPage' element={<LandingPage/>} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/map" element={<MapPage />} />
@@ -46,16 +48,17 @@ function App() {
           <Route path="/product/:id" element={<ProductPage />} />
         </Routes>
 
-        {/* Mobile Navbar at the bottom */}
+        {/* Mobile Navbar - Update NavLink paths */}
         {!shouldHideNavbar && (
           <nav className="mobile-navbar">
             <NavLink
-              to="/"
-              className={`nav-item ${activeTab === '/' ? 'active' : ''}`}
+              to="/dashboard"
+              className={`nav-item ${activeTab === '/dashboard' ? 'active' : ''}`}
             >
               <FontAwesomeIcon icon={faHome} />
-              {activeTab === '/' && <span>Home</span>}
+              {activeTab === '/dashboard' && <span>Home</span>}
             </NavLink>
+            {/* Update other NavLinks similarly */}
             <NavLink
               to="/map"
               className={`nav-item ${activeTab === '/map' ? 'active' : ''}`}

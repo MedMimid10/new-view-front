@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { spotService, soukService } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -28,6 +29,17 @@ function Dashboard() {
   const [souks, setSouks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+    
+    const handleStartClick = (item) => {
+      navigate('/videoPlayer', { 
+          state: { 
+              videoUrl: item.videoUrl,
+              name: item.name
+          } 
+      });
+    };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,7 +135,7 @@ if (error) return <div>{error}</div>;
                             <Card.Title>{spot.name}</Card.Title>
                             <Card.Text>{spot.description}</Card.Text>
                         </Card.Body>
-                        <Button variant="primary" className="card-btn">
+                        <Button variant="primary" className="card-btn" onClick={() => handleStartClick(spot)}>
                           Start
                         </Button>
                     </div>

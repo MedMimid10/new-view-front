@@ -30,7 +30,7 @@ const MapPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const navigate = useNavigate();  // Initialize the navigate function
+  const navigate = useNavigate(); 
 
   // Handler for button click
   const handleStartClick = (item) => {
@@ -494,14 +494,14 @@ const MapPage = () => {
                 <div className="popup-header">
                     <h3>Where are you going?</h3>
                     <div className="header-controls">
-                        <Form.Select 
+                        {/* <Form.Select 
                             value={selectedType}
                             onChange={(e) => setSelectedType(e.target.value)}
                             className="type-selector me-3"
                         >
                             <option value="spots">Spots</option>
                             <option value="souks">Souks</option>
-                        </Form.Select>
+                        </Form.Select> */}
                         <FontAwesomeIcon
                             icon={showCardContainer ? faAngleUp : faAngleDown}
                             className="popup-icon"
