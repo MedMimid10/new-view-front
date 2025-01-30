@@ -2,78 +2,69 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faStar, faCartPlus, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
-import './ProductPage.css'; // Ensure styles are updated for the new feature
-import { cartService, authService } from '../services/api.js';
-import { Modal, Button } from 'react-bootstrap';
-import { toast } from 'react-toastify';
+import './ProductPage.css';
+import { cartServiceV } from '../services/api.js';
+import { toast ,ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ProductPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const product = location.state; // Retrieve product data passed via state
-
-  const [count, setCount] = useState(1); // Initialize count state
-  const [showAuthModal, setShowAuthModal] = useState(false);
-
+  const product = location.state;
+  const [count, setCount] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!product) {
-    return <div>Product not found!</div>;
+    return (
+      <div className="error-container">
+        <h2>Product Not Found</h2>
+        <button onClick={() => navigate('/')} className="back-home-button">
+          Back to Home
+        </button>
+      </div>
+    );
   }
 
   const handleIncrement = () => {
-    setCount((prevCount) => prevCount + 1);
+    if (count < product.stockQuantity) {
+      setCount((prevCount) => prevCount + 1);
+    } else {
+      toast.warning('Maximum available quantity reached');
+    }
   };
 
   const handleDecrement = () => {
-    setCount((prevCount) => (prevCount > 1 ? prevCount - 1 : 1)); // Ensure count doesn't go below 1
+    if (count > 1) {
+      setCount((prevCount) => prevCount - 1);
+    }
   };
 
-  // const handleAddToCart = () => {
-  //   alert(`Added ${count} of ${product.name} to the cart!`);
-  //   // Integrate actual cart functionality here
-  // };
-
-
   const handleAddToCart = async () => {
-    console.log('Add to cart clicked:', { product, count });
-    
-    if (!authService.isAuthenticated()) {
-        console.log('User not authenticated, showing modal');
-        setShowAuthModal(true);
-        return;
-    }
-
     try {
-        await cartService.addToCart(product.id, count);
-        console.log('Successfully added to cart');
-        toast.success('Product added to cart successfully!');
+      setIsLoading(true);
+      await cartServiceV.addToCart(product.id, count);
+      
+      toast.success('🛍️ Product added to cart!');
+      
+      setCount(1);
     } catch (error) {
-        console.error('Error in handleAddToCart:', error);
-        if (error.message === 'Please login to add items to cart') {
-            setShowAuthModal(true);
-        } else {
-            toast.error('Failed to add product to cart');
-        }
+      console.error('Failed to add to cart:', error);
+      
+      toast.error('Unable to add product to cart');
+    } finally {
+      setIsLoading(false);
     }
-};
-
-const handleAuthRedirect = () => {
-  setShowAuthModal(false); // Close the modal
-  navigate('/login', { 
-      state: { 
-          returnTo: location.pathname,
-          product: product,
-          quantity: count
-      } 
-  });
-};
+  };
 
   return (
     <div className="product-page">
       {/* Header section */}
       <header className="product-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
+        <button 
+          className="back-button" 
+          onClick={() => navigate(-1)}
+          aria-label="Go back"
+        >
           <FontAwesomeIcon icon={faArrowLeft} className='icon-arrowL'/>
         </button>
         <img 
@@ -88,6 +79,9 @@ const handleAuthRedirect = () => {
         <div className="product-info">
           <span className='product-type'>{product.category}</span>
           <h1>{product.name}</h1>
+          <div className="product-price">
+            ${product.price?.toFixed(2)}
+          </div>
           <div className="product-meta">
             <div className="rating">
               <FontAwesomeIcon icon={faStar} className="star-icon" />
@@ -95,10 +89,11 @@ const handleAuthRedirect = () => {
             </div>
             <div className="separator"></div>
             <div className='product-quantity'>
-              <span>9 available</span>
+              <span>{product.stockQuantity} available</span>
             </div>
           </div>
         </div>
+
         {/* Product attributes */}
         <div className="product-attributes">
           {/* Color column */}
@@ -114,8 +109,8 @@ const handleAuthRedirect = () => {
           {/* Size column */}
           <div className="attribute-column">
             <h3>Size</h3>
-            <select className="size-select">
-              <option value="">Select size</option>
+            <select className="size-select" defaultValue="">
+              <option value="" disabled>Select size</option>
               <option value="S">Small (S)</option>
               <option value="M">Medium (M)</option>
               <option value="L">Large (L)</option>
@@ -126,48 +121,53 @@ const handleAuthRedirect = () => {
 
         <div className='product-descrip'>
           <h4>Details</h4>
-          <p>
-            {product.description}
-          </p>
+          <p>{product.description}</p>
         </div>
       </div>
-
-      {/* Authentication Modal */}
-      <Modal show={showAuthModal} onHide={() => setShowAuthModal(false)}>
-          <Modal.Header closeButton>
-              <Modal.Title>Authentication Required</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-              Please log in or create an account to add items to your cart.
-          </Modal.Body>
-          <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowAuthModal(false)}>
-                  Cancel
-              </Button>
-              <Button className='btn btn-auth' onClick={handleAuthRedirect}>
-                  Log In / Register
-              </Button>
-          </Modal.Footer>
-      </Modal>
 
       {/* Add to Cart Section */}
       <footer className="product-footer">
         <div className="footer-content">
           <div className="product-quantity-control">
-            <button className="quantity-button" onClick={handleDecrement}>
+            <button 
+              className="quantity-button" 
+              onClick={handleDecrement}
+              disabled={isLoading || count <= 1}
+              aria-label="Decrease quantity"
+            >
               <FontAwesomeIcon icon={faMinus} />
             </button>
             <span className="quantity-count">{count}</span>
-            <button className="quantity-button" onClick={handleIncrement}>
+            <button 
+              className="quantity-button" 
+              onClick={handleIncrement}
+              disabled={isLoading || count >= product.stockQuantity}
+              aria-label="Increase quantity"
+            >
               <FontAwesomeIcon icon={faPlus} />
             </button>
           </div>
-          <button className="add-to-cart-button" onClick={handleAddToCart}>
+          <button 
+            className="add-to-cart-button" 
+            onClick={handleAddToCart}
+            disabled={isLoading}
+          >
             <FontAwesomeIcon icon={faCartPlus} className="cart-icon" />
-            Add to Cart
+            {isLoading ? 'Adding...' : 'Add to Cart'}
           </button>
         </div>
       </footer>
+      <ToastContainer 
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { spotService, soukService } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faMapMarkerAlt, faClock, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Card, Container, Form, Image } from 'react-bootstrap';
 import './Dashboard.css';
@@ -31,12 +31,31 @@ function Dashboard() {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+
+  const featuredSouk = {
+    id: 'featured-souk-1',
+    name: 'Souk El Bahja',
+    description: 'Famous craft market in the heart of Marrakesh Medina',
+    imageUrl: '/img-tourist.png', // Replace with your craft souk image
+    location: 'Medina Quarter, Marrakesh',
+    craftTypes: 'Leather, Carpets, Ceramics, Metalwork',
+    timing: 'Open Daily • 9AM - 8PM',
+    merchantCount: '150+ Artisans'
+  };
     
     const handleStartClick = (item) => {
       navigate('/videoPlayer', { 
           state: { 
               videoUrl: item.videoUrl,
               name: item.name
+          } 
+      });
+    };
+
+    const handleExploreClick = () => {
+      navigate('/videoPlayer', { 
+          state: { 
+              videoUrl: "/videos/marrakech-medina-video360.mp4",
           } 
       });
     };
@@ -65,19 +84,7 @@ function Dashboard() {
 
 if (loading) return <div>Loading...</div>;
 if (error) return <div>{error}</div>;
-  // const bestSpots = [
-  //   { image: '/historic-mon-icons/koutoubia.jpg', title: "Spot 1", description: "Description for Spot 1" },
-  //   { image: '/historic-mon-icons/Place-Jemaa-El-Fna-Marrakech-tombée-de-la-Nuit.jpg', title: "Spot 2", description: "Description for Spot 2" },
-  //   { image: '/historic-mon-icons/bahia-palace.jpg', title: "Spot 3", description: "Description for Spot 3" },
-  // ];
-
-  // const souksCategories = [
-  //   { image: '/artisanat-souk/category-1.jpeg', title: "Spot 1"},
-  //   { image: '/artisanat-souk/category-2.jpeg', title: "Spot 2"},
-  //   { image: '/artisanat-souk/category-3.jpeg', title: "Spot 3"},
-  //   { image: '/artisanat-souk/category-4.jpeg', title: "Spot 4"},
-  // ];
-
+  
   const categoryItems = [
     { image: accessItem, title: "Accessories" },
     { image: bagItem, title: "Bags" },
@@ -116,6 +123,50 @@ if (error) return <div>{error}</div>;
         </Form>
       </div>
 
+      <div className="featured-section mb-5">
+        <div className="section-header mb-3">
+          <h2 className="text-2xl font-bold">Visit Souks Like Never Before</h2>
+          <p className="text-gray-600">Discover the Magic of Marrakesh's Artisan Markets</p>
+        </div>
+
+        <Card className="featured-souk">
+          <div className="souk-image-container">
+            <Card.Img 
+              src={featuredSouk.imageUrl}
+              alt={featuredSouk.name}
+              className="souk-main-image"
+            />
+            <div className="souk-content-overlay">
+              <div className="souk-main-info">
+                <div className="souk-title-section">
+                  <h3>{featuredSouk.name}</h3>
+                  <p>{featuredSouk.description}</p>
+                </div>
+
+                <div className="souk-details-row">
+                  <div className="detail-item">
+                    <FontAwesomeIcon icon={faMapMarkerAlt} />
+                    <span>{featuredSouk.location}</span>
+                  </div>
+                  {/* <div className="detail-item">
+                    <FontAwesomeIcon icon={faClock} />
+                    <span>{featuredSouk.timing}</span>
+                  </div> */}
+                  <div className="detail-item">
+                    <FontAwesomeIcon icon={faUser} />
+                    <span>{featuredSouk.merchantCount}</span>
+                  </div>
+                </div>
+
+                <Button className="explore-souk-btn" onClick={() => handleExploreClick()}>
+                  Explore Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
       <div>
         <div className='spot-ele'>
           <h3>Discover City<img src={FireIcon} alt="Fire"/></h3>
@@ -144,7 +195,7 @@ if (error) return <div>{error}</div>;
         </div>
       </div>
 
-      <div>
+      {/* <div>
         <div className='spot-ele'>
           <h3>Visit Souk<img src={FireIcon} alt="Fire"/></h3>
           <span>Show List</span>
@@ -170,7 +221,7 @@ if (error) return <div>{error}</div>;
               </Card>
             ))}
         </div>
-      </div>
+      </div> */}
 
       <div>
 

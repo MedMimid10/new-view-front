@@ -284,4 +284,22 @@
     border-color: #CF8562 !important;
   }
   
+  /* Custom toast styles */
+.Toastify__toast {
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.Toastify__toast--success {
+  background: #4caf50;
+}
+
+.Toastify__toast--error {
+  background: #f44336;
+}
+
+.Toastify__toast-body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+}
   

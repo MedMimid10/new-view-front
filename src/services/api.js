@@ -149,3 +149,79 @@ export const cartService = {
         }
     }
 };
+
+export const cartServiceV = {
+    addToCart: async (productId, quantity) => {
+      try {
+        const response = await axios.post(`${API_BASE_URL}/cartV`, {
+          productId,
+          quantity
+        }, {
+          withCredentials: true // Important for session handling
+        });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || error ;
+      }
+    },
+  
+    getCartItems: async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/cartV`, {
+          withCredentials: true
+        });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || 'Failed to fetch cart items';
+      }
+    },
+  
+    updateCartItemQuantity: async (cartItemId, productId, quantity) => {
+      try {
+        const response = await axios.patch(`${API_BASE_URL}/cartV/${cartItemId}`, {
+          productId,
+          quantity
+        }, {
+          withCredentials: true
+        });
+        return response.data;
+      } catch (error) {
+        throw error.response?.data || 'Failed to update cart item';
+      }
+    },
+  
+    removeFromCart: async (cartItemId) => {
+      try {
+        await axios.delete(`${API_BASE_URL}/cartV/${cartItemId}`, {
+          withCredentials: true
+        });
+      } catch (error) {
+        throw error.response?.data || 'Failed to remove item from cart';
+      }
+    }
+  };
+
+  export const orderVService = {
+    createOrder: async (orderData) => {
+        try {
+            const response = await axios.post(`${API_BASE_URL}/orderV`, orderData, {
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+
+    getOrder: async (orderId) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/orderV/${orderId}`, {
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+
+  };

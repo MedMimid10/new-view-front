@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Syne:wght@400..800&display=swap');
+ 
 .search-input {
     border-radius: 30px !important;
     padding: 8px 10px 8px 40px !important;
@@ -245,3 +248,116 @@
   margin-top: 8px; /* Space between image and title */
 }
   
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2D3748;
+  margin-bottom: 4px;
+}
+
+.section-header p {
+  color: #718096;
+  font-size: 16px;
+}
+
+.featured-souk {
+  position: relative;
+  border: none;
+  border-radius: 20px !important;
+  overflow: hidden;
+  margin-top: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  height: 400px;
+}
+
+.featured-souk:hover {
+  transform: translateY(-5px);
+}
+
+.souk-image-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+}
+
+.souk-main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.souk-content-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, 
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.8) 15%,
+    rgba(0, 0, 0, 0) 45%);
+  padding: 16px;
+  color: white;
+}
+
+.souk-main-info {
+  max-width: 100%;
+}
+
+.souk-title-section {
+  margin-bottom: 15px;
+}
+
+.souk-title-section h3 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: white;
+  font-family: "Montserrat", sans-serif;
+}
+
+.souk-title-section p {
+  font-size: 16px;
+  color: #E2E8F0;
+  margin-bottom: 0;
+}
+
+.souk-details-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #CBD5E0;
+  font-size: 14px;
+}
+
+.detail-item svg {
+  color: #4299E1;
+}
+
+.explore-souk-btn {
+  background: #4299E1 !important;
+  border: none !important;
+  padding: 12px 30px !important;
+  font-size: 16px !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+}
+
+.explore-souk-btn:hover {
+  background: #3182CE !important;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}

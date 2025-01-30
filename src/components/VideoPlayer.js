@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 // import { Image } from 'react-bootstrap';
-import { Html, OrbitControls } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackward, faForward, faPause, faPlay, faVolumeMute, faVolumeUp, faArrowLeft, faAnglesRight, faAnglesLeft, faShoppingCart, faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -8,7 +8,8 @@ import * as THREE from 'three';
 import { storeService, spotService, soukService } from '../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './VideoPlayer.css';
-
+import CartPopup from './CartPopup';
+import { ToastContainer } from 'react-toastify';
 
 function VideoPlayer() {
   const videoRef = useRef(null);
@@ -455,48 +456,22 @@ useEffect(() => {
         {/* {cartItems.length > 0 && <span className="cart-badge">{cartItems.length}</span>} */}
       </button>
 
-      {/* Cart popup */}
-      {isCartVisible && (
-        <div className="cart-popup" ref={cartRef}>
-          <div className="cart-header">
-            <h3>Shopping Cart</h3>
-            <button className="close-button" onClick={() => setIsCartVisible(false)}>
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-          </div>
-          <div className="cart-items">
-            {/* {cartItems.length === 0 ? (
-              <p className="empty-cart">Your cart is empty</p>
-            ) : (
-              cartItems.map(item => (
-                <div key={item.id} className="cart-item">
-                  <img src={item.imageUrl} alt={item.name} className="item-image" />
-                  <div className="item-details">
-                    <h4>{item.name}</h4>
-                    <p className="item-price">${item.price}</p>
-                  </div>
-                  <div className="item-quantity">
-                    <button onClick={() => updateQuantity(item.id, -1)}>-</button>
-                    <span>{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.id, 1)}>+</button>
-                  </div>
-                </div>
-              ))
-            )} */}
-          </div>
-          {/* {cartItems.length > 0 && (
-            <div className="cart-footer">
-              <div className="cart-total">
-                <span>Total:</span>
-                <span>${calculateTotal()}</span>
-              </div>
-              <button className="checkout-button" onClick={handleCheckout}>
-                Checkout
-              </button>
-            </div>
-          )} */}
-        </div>
-      )}
+      <CartPopup 
+        isVisible={isCartVisible} 
+        onClose={() => setIsCartVisible(false)} 
+      />
+
+      <ToastContainer 
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
       <div className="souk-info-card">
         <div className="souk-info-container">

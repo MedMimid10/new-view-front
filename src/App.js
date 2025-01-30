@@ -13,6 +13,7 @@ import ProductPage from './components/ProductPage';
 import './App.css';
 import LandingPage from './components/LandingPage';
 import { Navigate } from 'react-router-dom';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('/');
