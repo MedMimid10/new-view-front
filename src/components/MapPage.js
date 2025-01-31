@@ -530,11 +530,12 @@ const MapPage = () => {
                                 )}
                             </Card.Body>
                             <Button 
-                                variant="primary" 
-                                className="card-btn" 
+                                variant={item.videoUrl ? "primary" : "secondary"}
+                                className={`card-btn ${!item.videoUrl ? 'disabled-btn' : ''}`}
                                 onClick={() => handleStartClick(item)}
+                                disabled={!item.videoUrl}
                             >
-                                Start
+                                {item.videoUrl ? 'Start' : 'Coming Soon'}
                             </Button>
                         </div>
                     </Card>

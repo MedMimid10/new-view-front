@@ -21,6 +21,12 @@
 .welcome-title{
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+.title-mc {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  margin: 0;
 }
 .welcome-title img {
   width: 20px; /* Adjust as needed */
@@ -61,7 +67,7 @@
 .card-container .scroll-card {
   position: relative;
   flex-shrink: 0;
-  width: 300px;
+  width: 315px;
   height: 180px !important;
   border-radius: 16px !important;
 }
@@ -95,14 +101,28 @@
   border: none !important; 
   font-size: 14px !important;
   border-radius: 10px !important;
-  width: 80px; 
+  width: 95px; 
   height: 30px;  
   display: flex;
   align-items: center !important;
   justify-content: center !important;
 }
   
-  
+.card-container .disabled-btn {
+  color: #fff !important;
+  font-size: 12px !important;
+  background-color: #929292 !important;
+  border-color: #cccccc !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+  width: 112px !important;
+}
+
+/* .card-container .disabled-btn:hover {
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+} */
+
 .card-container .card-title{
   margin: 0;
   font-size: 14px;

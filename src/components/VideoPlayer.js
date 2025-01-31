@@ -3,9 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackward, faForward, faPause, faPlay, faVolumeMute, faVolumeUp, faArrowLeft, faAnglesRight, faAnglesLeft, faShoppingCart, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faBackward, faForward, faPause, faPlay, faVolumeMute, faVolumeUp, faArrowLeft, faAnglesRight, faAnglesLeft, faCartShopping, faCartPlus } from '@fortawesome/free-solid-svg-icons';
 import * as THREE from 'three';
-import { storeService, spotService, soukService } from '../services/api';
+import { storeService, spotService, soukService, cartServiceV } from '../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './VideoPlayer.css';
 import CartPopup from './CartPopup';
@@ -40,6 +40,21 @@ function VideoPlayer() {
   const location = useLocation();
   const videoUrl = location.state?.videoUrl;
   const spotType = location.state?.type;
+
+  const [cartItems, setCartItems] = useState([]);
+  
+    useEffect(() => {
+      fetchCartItems();
+    }, []);
+  
+    const fetchCartItems = async () => {
+      try {
+        const items = await cartServiceV.getCartItems();
+        setCartItems(items);
+      } catch (error) {
+        console.error('Failed to fetch cart items:', error);
+      }
+    };
 
 
   const fetchStoreData = async (storeIds) => {
@@ -89,15 +104,14 @@ function VideoPlayer() {
         })
       );
 
-      // Process store positions (alternating left and right)
       const processedStores = storesData.map(store => ({
         ...store,
         position: store.side === 'right' 
-          ? [60, 0, -130]   
-          : [-60, 0, -130], 
+          ? [30, 0, -130]   
+          : [-90, 0, -130], // Adjusted from -120 to -90
         rotation: store.side === 'right'
-          ? [0, 5, 0]       
-          : [0, -5, 0]     
+          ? [0, 5.5, 0]       
+          : [0, -4.5, 0]  // Adjusted from -4.5 to -5.5 for symmetry   
       }));
 
       setStores(processedStores);
@@ -420,7 +434,7 @@ useEffect(() => {
         />
 
         {videoTexture && (
-          <mesh scale={[-1, 1, 1]} rotation={[0, 300, 0]}>
+          <mesh scale={[-1, 1, 1]} rotation={[0, 200, 0]}>
             <sphereGeometry args={[150, 64, 64]} />
             <meshBasicMaterial side={THREE.DoubleSide} map={videoTexture} />
           </mesh>
@@ -451,9 +465,18 @@ useEffect(() => {
       </button>
 
       {/* New cart button */}
-      <button className="cart-buttonV" onClick={() => setIsCartVisible(!isCartVisible)}>
-        <FontAwesomeIcon icon={faShoppingCart}/>
-        {/* {cartItems.length > 0 && <span className="cart-badge">{cartItems.length}</span>} */}
+      <button 
+        className="cart-buttonV" 
+        onClick={() => setIsCartVisible(!isCartVisible)}
+        aria-label={`Shopping cart ${cartItems.length ? `with ${cartItems.length} items` : 'empty'}`}
+      >
+        <FontAwesomeIcon 
+          icon={cartItems.length > 0 ? faCartPlus : faCartShopping} 
+          className={cartItems.length > 0 ? 'cart-icon-filled' : 'cart-icon-empty'} 
+        />
+        {cartItems.length > 0 && (
+          <span className="cart-badge">{cartItems.length}</span>
+        )}
       </button>
 
       <CartPopup 
@@ -463,7 +486,7 @@ useEffect(() => {
 
       <ToastContainer 
         position="top-center"
-        autoClose={3000}
+        autoClose={1200}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick

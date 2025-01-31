@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, NavLink, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faMapMarkedAlt, faHeart, faCog, faList } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faMapMarkedAlt, faHeart, faCog, faList, faCartShopping } from '@fortawesome/free-solid-svg-icons';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
@@ -14,6 +14,7 @@ import './App.css';
 import LandingPage from './components/LandingPage';
 import { Navigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
+import CartItems from './components/CartItems';
 
 function App() {
   const [activeTab, setActiveTab] = useState('/');
@@ -35,7 +36,7 @@ function App() {
       <>
         <Routes>
           {/* Add redirect for root path to landing page */}
-          <Route path="/" element={<Navigate to="/landingPage" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
           {/* Rest of your routes */}
           <Route path='/landingPage' element={<LandingPage/>} />
@@ -47,6 +48,7 @@ function App() {
           <Route path="/videoPlayer" element={<VideoPlayer />} />
           <Route path="/seller/:storeId" element={<SellerProfile />} />
           <Route path="/product/:id" element={<ProductPage />} />
+          <Route path="/cart" element={<CartItems />} />
         </Routes>
 
         {/* Mobile Navbar - Update NavLink paths */}
@@ -68,13 +70,13 @@ function App() {
               {activeTab === '/map' && <span>Explore</span>}
             </NavLink>
             <NavLink
-              to="/activity"
-              className={`nav-item ${activeTab === '/activity' ? 'active' : ''}`}
+              to="/Cart"
+              className={`nav-item ${activeTab === '/Cart' ? 'active' : ''}`}
             >
-              <FontAwesomeIcon icon={faList} />
-              {activeTab === '/activity' && <span>Activity</span>}
+              <FontAwesomeIcon icon={faCartShopping} />
+              {activeTab === '/Cart' && <span>Cart</span>}
             </NavLink>
-            <NavLink
+            {/* <NavLink
               to="/like"
               className={`nav-item ${activeTab === '/like' ? 'active' : ''}`}
             >
@@ -87,7 +89,7 @@ function App() {
             >
               <FontAwesomeIcon icon={faCog} />
               {activeTab === '/settings' && <span>Settings</span>}
-            </NavLink>
+            </NavLink> */}
           </nav>
         )}
       </>

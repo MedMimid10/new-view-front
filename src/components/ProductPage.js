@@ -1,18 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faStar, faCartPlus, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faStar, faCartPlus, faPlus, faMinus, faCartShopping } from '@fortawesome/free-solid-svg-icons';
 import './ProductPage.css';
 import { cartServiceV } from '../services/api.js';
-import { toast ,ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import CartPopup from './CartPopup';
 
 const ProductPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const product = location.state;
   const [count, setCount] = useState(1);
+  const [isCartVisible, setIsCartVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    fetchCartItems();
+  }, []);
+
+  const fetchCartItems = async () => {
+    try {
+      const items = await cartServiceV.getCartItems();
+      setCartItems(items);
+    } catch (error) {
+      console.error('Failed to fetch cart items:', error);
+    }
+  };
 
   if (!product) {
     return (
@@ -43,13 +59,11 @@ const ProductPage = () => {
     try {
       setIsLoading(true);
       await cartServiceV.addToCart(product.id, count);
-      
-      toast.success('🛍️ Product added to cart!');
-      
+      await fetchCartItems();
+      toast.success('Product added to cart!');
       setCount(1);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      
       toast.error('Unable to add product to cart');
     } finally {
       setIsLoading(false);
@@ -57,7 +71,26 @@ const ProductPage = () => {
   };
 
   return (
+    
     <div className="product-page">
+
+      <CartPopup 
+        isVisible={isCartVisible} 
+        onClose={() => setIsCartVisible(false)} 
+      />
+
+      <ToastContainer 
+        position="top-center"
+        autoClose={1200}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
       {/* Header section */}
       <header className="product-header">
         <button 
@@ -67,6 +100,20 @@ const ProductPage = () => {
         >
           <FontAwesomeIcon icon={faArrowLeft} className='icon-arrowL'/>
         </button>
+        <button 
+          className="cart-button" 
+          onClick={() => setIsCartVisible(!isCartVisible)}
+          aria-label={`Shopping cart ${cartItems.length ? `with ${cartItems.length} items` : 'empty'}`}
+        >
+          <FontAwesomeIcon 
+            icon={cartItems.length > 0 ? faCartPlus : faCartShopping} 
+            className={cartItems.length > 0 ? 'cart-icon-filled' : 'cart-icon-empty'} 
+          />
+          {cartItems.length > 0 && (
+            <span className="cart-badge">{cartItems.length}</span>
+          )}
+        </button>
+
         <img 
           src={product.imageUrl} 
           alt={product.name} 
@@ -157,17 +204,6 @@ const ProductPage = () => {
           </button>
         </div>
       </footer>
-      <ToastContainer 
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
     </div>
   );
 };

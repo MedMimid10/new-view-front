@@ -1,0 +1,245 @@
+.cart-items-page {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 0 55px 0;
+}
+
+.cart-items-page h2 {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.cart-items-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.cart-items-container .cart-items-list {
+    padding: 20px;
+}
+
+.cart-items-list .cart-item {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.cart-items-list .cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-items-list .item-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.cart-items-list .item-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cart-items-list .item-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.cart-items-list .item-price {
+    color: #666;
+    font-weight: 500;
+}
+
+.cart-items-list .item-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.cart-items-list .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #FFF9F6;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.cart-items-list .quantity-button {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.cart-items-list .quantity-button:hover:not(:disabled) {
+    color: #333;
+}
+
+.cart-items-list .quantity-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cart-items-list .quantity {
+    font-weight: 500;
+    min-width: 20px;
+    text-align: center;
+}
+
+.cart-items-list .remove-button {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 6px;
+    transition: color 0.2s;
+  }
+  
+.cart-items-list .remove-button:hover:not(:disabled) {
+    color: #c82333;
+}
+
+.cart-summary {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    background: #f9f9f9;
+    border-radius: 0 0 12px 12px;
+}
+
+.cart-summary .cart-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.cart-summary .checkout-button {
+    width: 100%;
+    padding: 15px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.cart-summary .checkout-button:hover:not(:disabled) {
+    background: #45a049;
+}
+
+.cart-summary .checkout-button:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+.cart-summary .cart-loading {
+    text-align: center;
+    padding: 50px;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.empty-cart-container {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-cart-content {
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.empty-cart-icon {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 10px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.empty-cart-content h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0;
+}
+
+.empty-cart-content p {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.explore-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 30px;
+    background: linear-gradient(45deg, #CF8562, #ab6f53);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+}
+
+.explore-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+.arrow-icon {
+    transition: transform 0.2s;
+}
+
+.explore-button:hover .arrow-icon {
+    transform: translateX(5px);
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+/* Add a subtle parallax effect on mouse move */
+.empty-cart-container {
+    perspective: 1000px;
+}
+
+.empty-cart-content {
+    transform-style: preserve-3d;
+    transition: transform 0.1s;
+}
+
+@media (max-width: 460px) {
+    .cart-items-list .cart-item {
+        gap: 14px;
+        padding: 12px 0px;
+    }
+}

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { storeService } from '../services/api.js';
+import { storeService, cartServiceV } from '../services/api.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faStar, faCartShopping, faCartPlus } from '@fortawesome/free-solid-svg-icons';
 import './SellerProfile.css';
 import filterIcon from './assets/Frame.png';
+import CartPopup from './CartPopup';
+import { ToastContainer } from 'react-toastify';
 
 //import balghineImage from './assets/balghine.jpg';
 // import Item1 from './assets/artisanat-marocain-exportations.jpg';
@@ -83,8 +85,24 @@ function SellerProfile() {
   const { storeId } = useParams();
   const [store, setStore] = useState(null);
   const [products, setProducts] = useState([]);
+  const [isCartVisible, setIsCartVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    fetchCartItems();
+  }, []);
+
+  const fetchCartItems = async () => {
+    try {
+      const items = await cartServiceV.getCartItems();
+      setCartItems(items);
+    } catch (error) {
+      console.error('Failed to fetch cart items:', error);
+    }
+  };
 
   const handleProductClick = (product) => {
     navigate(`/product/${product.id}`, { state: product });
@@ -124,6 +142,37 @@ function SellerProfile() {
           <button className="back-button" onClick={() => navigate(-1)}>
             <FontAwesomeIcon icon={faArrowLeft} className='icon-arrowL'/>
           </button>
+          {/* New cart button */}
+          <button 
+            className="cart-button" 
+            onClick={() => setIsCartVisible(!isCartVisible)}
+            aria-label={`Shopping cart ${cartItems.length ? `with ${cartItems.length} items` : 'empty'}`}
+          >
+            <FontAwesomeIcon 
+              icon={cartItems.length > 0 ? faCartPlus : faCartShopping} 
+              className={cartItems.length > 0 ? 'cart-icon-filled' : 'cart-icon-empty'} 
+            />
+            {cartItems.length > 0 && (
+              <span className="cart-badge">{cartItems.length}</span>
+            )}
+          </button>
+
+          <CartPopup 
+            isVisible={isCartVisible} 
+            onClose={() => setIsCartVisible(false)} 
+          />
+
+          <ToastContainer 
+            position="top-center"
+            autoClose={1200}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
           <div className="profile-container">
             <img
               src={store.profileImageUrl}

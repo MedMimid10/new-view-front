@@ -218,6 +218,15 @@
       justify-content: center !important;
     }
     
+    .info-btn .disabled-btn {
+      color: #fff !important;
+      font-size: 11px !important;
+      background-color: #929292 !important;
+      border-color: #cccccc !important;
+      cursor: not-allowed !important;
+      opacity: 1 !important;
+      width: 112px !important;
+    }
     
     .card-title{
       margin: 0;

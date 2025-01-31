@@ -56,6 +56,7 @@ function Dashboard() {
       navigate('/videoPlayer', { 
           state: { 
               videoUrl: "/videos/marrakech-medina-video360.mp4",
+              autoplay: true
           } 
       });
     };
@@ -110,7 +111,10 @@ if (error) return <div>{error}</div>;
   return (
     <Container style={{ paddingBottom: '60px', paddingTop: '10px' }}>
       <div>
-        <h3 className='welcome-title pb-1'>Hello user<img src={WaveHandIcon} alt="WaveHand"/></h3>
+        <div className='welcome-title pb-3'>
+          <svg xmlns="http://www.w3.org/2000/svg" width="35" height="26" viewBox="0 0 216.13 139.379"><g fill-rule="evenodd" clip-rule="evenodd" stroke-miterlimit="2.613"><path fill="#cc2229" stroke="#cc2229" stroke-width=".13" d="M.065.065h215.999v139.248H.065V.065z"/><path d="M96.833 72.714l-12.96-9.432h29.519l-.646-2.088H76.242l19.584 14.832 1.007-3.312zm22.608.143l-11.592-33.479-7.632 21.816h3.096l4.608-14.472 9.288 27.792 2.232-1.657zm-8.712 10.296l-2.375-1.8 23.76-18H116.13l-.863-2.232h24.623l-29.161 22.032zm-22.464 16.849l19.8-14.832-2.304-1.8-12.816 9.647 9.72-29.736h-2.736l-11.664 36.721zm9.792-22.464l29.304 21.888-7.199-23.472-1.873 1.512 4.537 14.832-23.761-18.072-1.008 3.312z" fill="#62b16e" stroke="#000" stroke-width=".326"/></g></svg>
+          <h3 className='title-mc ps-1'>MOROCCAN CULTURE</h3>
+        </div>
         <Form>
           <Form.Group controlId="searchInput" className="input-icon mb-4">
             <FontAwesomeIcon icon={faSearch} className="search-icon" />
@@ -123,10 +127,10 @@ if (error) return <div>{error}</div>;
         </Form>
       </div>
 
-      <div className="featured-section mb-5">
+      <div className="featured-section mb-4">
         <div className="section-header mb-3">
-          <h2 className="text-2xl font-bold">Visit Souks Like Never Before</h2>
-          <p className="text-gray-600">Discover the Magic of Marrakesh's Artisan Markets</p>
+          <h2 className="text-2xl font-bold">Visit And Buy Like Never Before</h2>
+          <p className="text-gray-600">Leave The Culture Leave The Magic</p>
         </div>
 
         <Card className="featured-souk">
@@ -182,13 +186,18 @@ if (error) return <div>{error}</div>;
                         alt={spot.name} 
                     />
                     <div className="info-btn">
-                        <Card.Body className="card-info">
-                            <Card.Title>{spot.name}</Card.Title>
-                            <Card.Text>{spot.description}</Card.Text>
-                        </Card.Body>
-                        <Button variant="primary" className="card-btn" onClick={() => handleStartClick(spot)}>
-                          Start
-                        </Button>
+                      <Card.Body className="card-info">
+                          <Card.Title>{spot.name}</Card.Title>
+                          <Card.Text>{spot.description}</Card.Text>
+                      </Card.Body>
+                      <Button 
+                          variant={spot.videoUrl ? "primary" : "secondary"}
+                          className={`card-btn ${!spot.videoUrl ? 'disabled-btn' : ''}`}
+                          onClick={() => handleStartClick(spot)}
+                          disabled={!spot.videoUrl}
+                      >
+                          {spot.videoUrl ? 'Start' : 'Coming Soon'}
+                      </Button>
                     </div>
                 </Card>
             ))}
