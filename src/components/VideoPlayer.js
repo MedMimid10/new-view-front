@@ -37,8 +37,10 @@ function VideoPlayer() {
 
   const navigate = useNavigate();
 
+  const S3_URL = 'https://fsn1.your-objectstorage.com/videosmarrakerch/'
+
   const location = useLocation();
-  const videoUrl = location.state?.videoUrl;
+  const videoUrl = S3_URL + location.state?.videoUrl;
   const spotType = location.state?.type;
 
   const [cartItems, setCartItems] = useState([]);
