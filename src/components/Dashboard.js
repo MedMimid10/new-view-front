@@ -36,6 +36,7 @@ function Dashboard() {
     id: 'featured-souk-1',
     name: 'Souk El Bahja',
     description: 'Famous craft market in the heart of Marrakesh Medina',
+    video_url: 'souk3.MP4',
     imageUrl: '/img-tourist.png', // Replace with your craft souk image
     location: 'Medina Quarter, Marrakesh',
     craftTypes: 'Leather, Carpets, Ceramics, Metalwork',
@@ -55,7 +56,7 @@ function Dashboard() {
     const handleExploreClick = () => {
       navigate('/videoPlayer', { 
           state: { 
-              videoUrl: "/videos/marrakech-medina-video360.mp4",
+              videoUrl: "marrakech-medina-video360.mp4",
               autoplay: true
           } 
       });
