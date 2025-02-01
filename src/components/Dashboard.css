@@ -118,10 +118,18 @@
   width: 112px !important;
 }
 
-/* .card-container .disabled-btn:hover {
-  background-color: #cccccc !important;
-  border-color: #cccccc !important;
-} */
+.clickable-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.clickable-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.disabled-card {
+  opacity: 0.7;
+}
 
 .card-container .card-title{
   margin: 0;

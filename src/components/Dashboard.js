@@ -40,14 +40,16 @@ function Dashboard() {
     location: 'Medina Quarter, Marrakesh',
     craftTypes: 'Leather, Carpets, Ceramics, Metalwork',
     timing: 'Open Daily • 9AM - 8PM',
-    merchantCount: '150+ Artisans'
+    merchantCount: '150+ Artisans',
+    videoUrlSouk: '/videos/masin lil.mp4'
   };
     
     const handleStartClick = (item) => {
       navigate('/videoPlayer', { 
           state: { 
               videoUrl: item.videoUrl,
-              name: item.name
+              name: item.name,
+              autoplay: true
           } 
       });
     };
@@ -55,7 +57,8 @@ function Dashboard() {
     const handleExploreClick = () => {
       navigate('/videoPlayer', { 
           state: { 
-              videoUrl: "/videos/marrakech-medina-video360.mp4",
+              videoUrl: featuredSouk.videoUrlSouk,
+              name: featuredSouk.name,
               autoplay: true
           } 
       });
@@ -133,7 +136,11 @@ if (error) return <div>{error}</div>;
           <p className="text-gray-600">Leave The Culture Leave The Magic</p>
         </div>
 
-        <Card className="featured-souk">
+        <Card 
+          className="featured-souk"
+          onClick={() => featuredSouk.videoUrlSouk && handleExploreClick()}
+          style={{ cursor: featuredSouk.videoUrlSouk ? 'pointer' : 'not-allowed' }}
+        >
           <div className="souk-image-container">
             <Card.Img 
               src={featuredSouk.imageUrl}
@@ -179,25 +186,29 @@ if (error) return <div>{error}</div>;
 
         <div className="card-container mb-4">
             {spots.map((spot) => (
-                <Card key={spot.id} className="scroll-card">
+                <Card 
+                    key={spot.id} 
+                    className={`scroll-card ${spot.videoUrl ? 'clickable-card' : 'disabled-card'}`}
+                    onClick={() => spot.videoUrl && handleStartClick(spot)}
+                    style={{ cursor: spot.videoUrl ? 'pointer' : 'not-allowed' }}
+                >
                     <Card.Img 
                         variant="top" 
-                        src={spot.imageUrl || '/placeholder.jpg'} 
+                        src={spot.imageUrl} 
                         alt={spot.name} 
                     />
                     <div className="info-btn">
-                      <Card.Body className="card-info">
-                          <Card.Title>{spot.name}</Card.Title>
-                          <Card.Text>{spot.description}</Card.Text>
-                      </Card.Body>
-                      <Button 
-                          variant={spot.videoUrl ? "primary" : "secondary"}
-                          className={`card-btn ${!spot.videoUrl ? 'disabled-btn' : ''}`}
-                          onClick={() => handleStartClick(spot)}
-                          disabled={!spot.videoUrl}
-                      >
-                          {spot.videoUrl ? 'Start' : 'Coming Soon'}
-                      </Button>
+                        <Card.Body className="card-info">
+                            <Card.Title>{spot.name}</Card.Title>
+                            <Card.Text>{spot.description}</Card.Text>
+                        </Card.Body>
+                        <Button 
+                            variant={spot.videoUrl ? "primary" : "secondary"}
+                            className={`card-btn ${!spot.videoUrl ? 'disabled-btn' : ''}`}
+                            disabled={!spot.videoUrl}
+                        >
+                            {spot.videoUrl ? 'Start' : 'Coming Soon'}
+                        </Button>
                     </div>
                 </Card>
             ))}

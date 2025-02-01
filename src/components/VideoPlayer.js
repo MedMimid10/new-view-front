@@ -15,9 +15,9 @@ function VideoPlayer() {
   const videoRef = useRef(null);
   const popupRef = useRef(null);
   const [videoTexture, setVideoTexture] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [playbackRate, setPlaybackRate] = useState(1.0);
-  const [volume, setVolume] = useState(0.5);
+  const [volume, setVolume] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -38,7 +38,7 @@ function VideoPlayer() {
   const navigate = useNavigate();
 
   const location = useLocation();
-  const videoUrl = location.state?.videoUrl;
+  const { videoUrl, autoplay } = location.state;
   const spotType = location.state?.type;
 
   const [cartItems, setCartItems] = useState([]);
@@ -107,11 +107,11 @@ function VideoPlayer() {
       const processedStores = storesData.map(store => ({
         ...store,
         position: store.side === 'right' 
-          ? [30, 0, -130]   
-          : [-90, 0, -130], // Adjusted from -120 to -90
+          ? [60, 0, -180]   
+          : [-60, 0, -180], 
         rotation: store.side === 'right'
-          ? [0, 5.5, 0]       
-          : [0, -4.5, 0]  // Adjusted from -4.5 to -5.5 for symmetry   
+          ? [0, 5, 0]       
+          : [0, -5, 0]
       }));
 
       setStores(processedStores);
@@ -219,23 +219,27 @@ useEffect(() => {
   let animationFrameId;
   const animationState = new Map(); // Track animation state for each store
   
-  if (video) {
-    // Prevent default touch behaviors
-    video.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-    }, { passive: false });
-
-    // Handle play/pause through your custom controls only
-    video.addEventListener('click', (e) => {
-      e.preventDefault();
-    });
-
+  if (video && videoUrl) {
+    
     video.src = videoUrl;
+    // Setup video only after source is set
+    if (autoplay) {
+      video.play().catch(error => {
+        console.error('Autoplay failed:', error);
+      });
+    }
     const texture = new THREE.VideoTexture(video);
     setVideoTexture(texture);
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.format = THREE.RGBFormat;
+
+    // Event listeners with proper function references for cleanup
+    const preventDefaultTouch = (e) => e.preventDefault();
+    const preventDefaultClick = (e) => e.preventDefault();
+
+    video.addEventListener('touchstart', preventDefaultTouch, { passive: false });
+    video.addEventListener('click', preventDefaultClick);
 
     video.onloadedmetadata = () => {
       setDuration(video.duration);
@@ -254,12 +258,11 @@ useEffect(() => {
 
       // Update position for each visible store with smooth animation
       const updatedStores = visibleStores.map(store => {
-        const targetZ = -130 + (currentTime - store.startTime) * 15;
-        
+        const targetZ = -180 + (currentTime - store.startTime) * 25;
         // Initialize or get current animation state
         if (!animationState.has(store.id)) {
           animationState.set(store.id, {
-            currentZ: -130,
+            currentZ: -180,
             velocity: 0
           });
         }
@@ -304,7 +307,7 @@ useEffect(() => {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    // Start animation loop
+    //Start animation loop
     animationFrameId = requestAnimationFrame(animate);
 
     video.ontimeupdate = () => {
@@ -434,7 +437,7 @@ useEffect(() => {
         />
 
         {videoTexture && (
-          <mesh scale={[-1, 1, 1]} rotation={[0, 200, 0]}>
+          <mesh scale={[-1, 1, 1]} rotation={[0, 0, 0]}>
             <sphereGeometry args={[150, 64, 64]} />
             <meshBasicMaterial side={THREE.DoubleSide} map={videoTexture} />
           </mesh>
