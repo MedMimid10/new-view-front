@@ -320,3 +320,7 @@ useEffect(() => {
       cancelAnimationFrame(animationFrameId);
     };
   }, [videoUrl, stores]);  
+
+  // const S3_URL = 'https://fsn1.your-objectstorage.com/videosmarrakerch/'
+
+    // videoUrl = S3_URL + videoUrl;

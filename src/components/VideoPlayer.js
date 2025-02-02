@@ -17,7 +17,7 @@ function VideoPlayer() {
   const [videoTexture, setVideoTexture] = useState(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [playbackRate, setPlaybackRate] = useState(1.0);
-  const [volume, setVolume] = useState(0);
+  const [volume, setVolume] = useState(0.5);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -40,7 +40,6 @@ function VideoPlayer() {
   const S3_URL = 'https://fsn1.your-objectstorage.com/videosmarrakerch/'
 
   const location = useLocation();
-  
   let { videoUrl, autoplay } = location.state;
   videoUrl = S3_URL + videoUrl;
   const spotType = location.state?.type;
@@ -216,7 +215,7 @@ function VideoPlayer() {
     // Create a texture from the canvas
     const texture = new THREE.CanvasTexture(canvas);
     return texture;
-  };
+};
   
 useEffect(() => {
   const video = videoRef.current;
@@ -237,6 +236,7 @@ useEffect(() => {
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.format = THREE.RGBFormat;
+    texture.colorSpace = THREE.SRGBColorSpace;
 
     // Event listeners with proper function references for cleanup
     const preventDefaultTouch = (e) => e.preventDefault();
@@ -329,115 +329,13 @@ useEffect(() => {
     });
     
     if (video) {
-      // Prevent default touch behaviors
-      video.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-      }, { passive: false });
-
-      // Handle play/pause through your custom controls only
-      video.addEventListener('click', (e) => {
-        e.preventDefault();
-      });
-
-      video.src = videoUrl;
-      const texture = new THREE.VideoTexture(video);
-      setVideoTexture(texture);
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      texture.format = THREE.RGBFormat;
-
-      video.onloadedmetadata = () => {
-        setDuration(video.duration);
-      };
-
-      // Smooth animation function
-      const animate = () => {
-        const currentTime = video.currentTime;
-        setCurrentTime(currentTime);
-
-        // Get stores that should be visible
-        const visibleStores = stores.filter(store => 
-          currentTime >= store.startTime && 
-          currentTime <= store.endTime
-        );
-
-        // Update position for each visible store with smooth animation
-        const updatedStores = visibleStores.map(store => {
-          const targetZ = -130 + (currentTime - store.startTime) * 15;
-          
-          // Initialize or get current animation state
-          if (!animationState.has(store.id)) {
-            animationState.set(store.id, {
-              currentZ: -130,
-              velocity: 0
-            });
-          }
-          
-          const state = animationState.get(store.id);
-          
-          // Spring animation parameters
-          const springStrength = 0.3; // Adjust for more/less springiness
-          const damping = 0.75; // Adjust for more/less smoothing
-          
-          // Calculate spring physics
-          const distance = targetZ - state.currentZ;
-          const acceleration = distance * springStrength;
-          state.velocity = state.velocity * damping + acceleration;
-          state.currentZ += state.velocity;
-
-          return {
-            ...store,
-            position: [
-              store.position[0],
-              store.position[1],
-              state.currentZ
-            ]
-          };
-        });
-
-        // Clean up animation states for non-visible stores
-        for (const [storeId] of animationState) {
-          if (!visibleStores.some(store => store.id === storeId)) {
-            animationState.delete(storeId);
-          }
-        }
-
-        setVisibleHotspots(updatedStores);
-        
-        // Hide popup if no hotspots are visible
-        if (updatedStores.length === 0) {
-          setIsPopupVisible(false);
-        }
-
-        // Continue animation loop
-        animationFrameId = requestAnimationFrame(animate);
-      };
-
-      // Start animation loop
-      animationFrameId = requestAnimationFrame(animate);
-
-      video.ontimeupdate = () => {
-        // Keep this for time tracking, but position updates happen in animation loop
-        setCurrentTime(video.currentTime);
-      };
+      video.ontimeupdate = null;
     }
-
-    return () => {
-      video.removeEventListener('touchstart', (e) => {
-        e.preventDefault();
-      });
-      video.removeEventListener('click', (e) => {
-        e.preventDefault();
-      });
-      
-      if (video) {
-        video.ontimeupdate = null;
-      }
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }}, [videoUrl, stores])
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+  };
+}, [videoUrl, stores]);
 
   const handlePlayPause = () => {
     const video = videoRef.current;
@@ -508,12 +406,37 @@ useEffect(() => {
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   }
   
+  const handleContainerClick = (event) => {
+    // Check if the click is on the Three.js canvas or other UI elements
+    if (
+      event.target.closest('.video-controls') || 
+      event.target.closest('.popup') ||
+      event.target.closest('.back-buttonV') ||
+      event.target.closest('.cart-buttonV') ||
+      event.target.closest('.souk-info-card')
+    ) {
+      return;
+    }
+    
+    handlePlayPause();
+  };
+  
   // Handle hotspot click
   const handleClickHotspot = (event, sellerId) => {
+    // Stop the Three.js event from propagating
     event.stopPropagation();
-    setCurrentSellerId(sellerId);
-    setIsPopupVisible(true);
-  };  
+    
+    // Ensure the video container click won't be triggered
+    setTimeout(() => {
+      if (videoRef.current && isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      }
+      
+      setCurrentSellerId(sellerId);
+      setIsPopupVisible(true);
+    }, 0);
+  };
 
   // Handle click outside the popup
   useEffect(() => {
@@ -528,8 +451,9 @@ useEffect(() => {
   }, [isPopupVisible], [isCartVisible]);
 
   return (
-    <div className="video-container">
-      <Canvas className="canvas" style={{ pointerEvents: isPopupVisible ? 'none' : 'auto' }}>
+    <div className="video-container" onClick={handleContainerClick}>
+      <Canvas className="canvas" style={{ pointerEvents: isPopupVisible ? 'none' : 'auto' }}
+      gl= {{ outputColorSpace: THREE.SRGBColorSpace, toneMapping: THREE.ACESFilmicToneMapping }}>
         <ambientLight intensity={0.5} />
         <OrbitControls
           enableDamping={true}

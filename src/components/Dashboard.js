@@ -42,7 +42,7 @@ function Dashboard() {
     craftTypes: 'Leather, Carpets, Ceramics, Metalwork',
     timing: 'Open Daily • 9AM - 8PM',
     merchantCount: '150+ Artisans',
-    videoUrlSouk: 'masin_lil_1.mp4'
+    videoUrlSouk: 'masin_lil.mp4'
   };
     
     const handleStartClick = (item) => {
