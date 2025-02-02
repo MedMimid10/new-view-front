@@ -15,6 +15,9 @@ import LandingPage from './components/LandingPage';
 import { Navigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import CartItems from './components/CartItems';
+import { initializeApp } from "firebase/app";
+import {analytics } from './firebase'
+import { logEvent } from 'firebase/analytics';
 
 function App() {
   const [activeTab, setActiveTab] = useState('/');
@@ -27,6 +30,7 @@ function App() {
     const location = useLocation();
 
     useEffect(() => {
+      logEvent(analytics, "mouse", "HELLO WORLD!!!")
       setActiveTab(location.pathname);
     }, [location.pathname]);
 

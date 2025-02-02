@@ -214,123 +214,123 @@ function VideoPlayer() {
     // Create a texture from the canvas
     const texture = new THREE.CanvasTexture(canvas);
     return texture;
-};
+  };
   
-useEffect(() => {
-  const video = videoRef.current;
-  let animationFrameId;
-  const animationState = new Map(); // Track animation state for each store
-  
-  if (video) {
-    // Prevent default touch behaviors
-    video.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-    }, { passive: false });
-
-    // Handle play/pause through your custom controls only
-    video.addEventListener('click', (e) => {
-      e.preventDefault();
-    });
-
-    video.src = videoUrl;
-    const texture = new THREE.VideoTexture(video);
-    setVideoTexture(texture);
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.format = THREE.RGBFormat;
-
-    video.onloadedmetadata = () => {
-      setDuration(video.duration);
-    };
-
-    // Smooth animation function
-    const animate = () => {
-      const currentTime = video.currentTime;
-      setCurrentTime(currentTime);
-
-      // Get stores that should be visible
-      const visibleStores = stores.filter(store => 
-        currentTime >= store.startTime && 
-        currentTime <= store.endTime
-      );
-
-      // Update position for each visible store with smooth animation
-      const updatedStores = visibleStores.map(store => {
-        const targetZ = -130 + (currentTime - store.startTime) * 15;
-        
-        // Initialize or get current animation state
-        if (!animationState.has(store.id)) {
-          animationState.set(store.id, {
-            currentZ: -130,
-            velocity: 0
-          });
-        }
-        
-        const state = animationState.get(store.id);
-        
-        // Spring animation parameters
-        const springStrength = 0.3; // Adjust for more/less springiness
-        const damping = 0.75; // Adjust for more/less smoothing
-        
-        // Calculate spring physics
-        const distance = targetZ - state.currentZ;
-        const acceleration = distance * springStrength;
-        state.velocity = state.velocity * damping + acceleration;
-        state.currentZ += state.velocity;
-
-        return {
-          ...store,
-          position: [
-            store.position[0],
-            store.position[1],
-            state.currentZ
-          ]
-        };
-      });
-
-      // Clean up animation states for non-visible stores
-      for (const [storeId] of animationState) {
-        if (!visibleStores.some(store => store.id === storeId)) {
-          animationState.delete(storeId);
-        }
-      }
-
-      setVisibleHotspots(updatedStores);
-      
-      // Hide popup if no hotspots are visible
-      if (updatedStores.length === 0) {
-        setIsPopupVisible(false);
-      }
-
-      // Continue animation loop
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    // Start animation loop
-    animationFrameId = requestAnimationFrame(animate);
-
-    video.ontimeupdate = () => {
-      // Keep this for time tracking, but position updates happen in animation loop
-      setCurrentTime(video.currentTime);
-    };
-  }
-
-  return () => {
-    video.removeEventListener('touchstart', (e) => {
-      e.preventDefault();
-    });
-    video.removeEventListener('click', (e) => {
-      e.preventDefault();
-    });
+  useEffect(() => {
+    const video = videoRef.current;
+    let animationFrameId;
+    const animationState = new Map(); // Track animation state for each store
     
     if (video) {
-      video.ontimeupdate = null;
+      // Prevent default touch behaviors
+      video.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      // Handle play/pause through your custom controls only
+      video.addEventListener('click', (e) => {
+        e.preventDefault();
+      });
+
+      video.src = videoUrl;
+      const texture = new THREE.VideoTexture(video);
+      setVideoTexture(texture);
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.format = THREE.RGBFormat;
+
+      video.onloadedmetadata = () => {
+        setDuration(video.duration);
+      };
+
+      // Smooth animation function
+      const animate = () => {
+        const currentTime = video.currentTime;
+        setCurrentTime(currentTime);
+
+        // Get stores that should be visible
+        const visibleStores = stores.filter(store => 
+          currentTime >= store.startTime && 
+          currentTime <= store.endTime
+        );
+
+        // Update position for each visible store with smooth animation
+        const updatedStores = visibleStores.map(store => {
+          const targetZ = -130 + (currentTime - store.startTime) * 15;
+          
+          // Initialize or get current animation state
+          if (!animationState.has(store.id)) {
+            animationState.set(store.id, {
+              currentZ: -130,
+              velocity: 0
+            });
+          }
+          
+          const state = animationState.get(store.id);
+          
+          // Spring animation parameters
+          const springStrength = 0.3; // Adjust for more/less springiness
+          const damping = 0.75; // Adjust for more/less smoothing
+          
+          // Calculate spring physics
+          const distance = targetZ - state.currentZ;
+          const acceleration = distance * springStrength;
+          state.velocity = state.velocity * damping + acceleration;
+          state.currentZ += state.velocity;
+
+          return {
+            ...store,
+            position: [
+              store.position[0],
+              store.position[1],
+              state.currentZ
+            ]
+          };
+        });
+
+        // Clean up animation states for non-visible stores
+        for (const [storeId] of animationState) {
+          if (!visibleStores.some(store => store.id === storeId)) {
+            animationState.delete(storeId);
+          }
+        }
+
+        setVisibleHotspots(updatedStores);
+        
+        // Hide popup if no hotspots are visible
+        if (updatedStores.length === 0) {
+          setIsPopupVisible(false);
+        }
+
+        // Continue animation loop
+        animationFrameId = requestAnimationFrame(animate);
+      };
+
+      // Start animation loop
+      animationFrameId = requestAnimationFrame(animate);
+
+      video.ontimeupdate = () => {
+        // Keep this for time tracking, but position updates happen in animation loop
+        setCurrentTime(video.currentTime);
+      };
     }
-    if (animationFrameId) {
-      cancelAnimationFrame(animationFrameId);
-    }
-  };
-}, [videoUrl, stores]);
+
+    return () => {
+      video.removeEventListener('touchstart', (e) => {
+        e.preventDefault();
+      });
+      video.removeEventListener('click', (e) => {
+        e.preventDefault();
+      });
+      
+      if (video) {
+        video.ontimeupdate = null;
+      }
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [videoUrl, stores]);
 
   const handlePlayPause = () => {
     const video = videoRef.current;
