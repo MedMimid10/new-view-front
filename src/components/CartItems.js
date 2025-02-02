@@ -69,7 +69,7 @@ const CartItems = () => {
         // Replace with your actual video URL or path
         navigate('/videoPlayer', { 
             state: { 
-                videoUrl: '/videos/marrakech-medina-video360.mp4',
+                videoUrl: 'marrakech-medina-video360.mp4',
                 autoplay: true 
             } 
         });
